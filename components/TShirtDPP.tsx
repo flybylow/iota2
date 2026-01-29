@@ -738,7 +738,7 @@ const TShirtDPP = () => {
                           👕
                         </div>
 
-                        {/* DPP Info - Minimal */}
+                        {/* DPP Info with Material Indicator */}
                         <div style={{
                           background: dpp.status === DPP_STATUS.ACTIVE
                             ? 'rgba(34, 197, 94, 0.1)'
@@ -756,12 +756,50 @@ const TShirtDPP = () => {
                           fontSize: '11px',
                         }}>
                           <div style={{ 
-                            fontWeight: '500', 
-                            marginBottom: '4px', 
-                            fontSize: '13px',
-                            color: '#f8fafc',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            marginBottom: '4px',
                           }}>
-                            {dpp.material}
+                            {/* Material icon/emoji indicator */}
+                            <span style={{ fontSize: '14px' }}>
+                              {dpp.material.includes('Organic') ? '🌱' :
+                               dpp.material.includes('Recycled') ? '♻️' :
+                               dpp.material.includes('100% Cotton') ? '🌿' :
+                               dpp.material.includes('Blend') ? '🔀' :
+                               dpp.material.includes('Polyester') ? '🧪' : '👕'}
+                            </span>
+                            <div style={{ 
+                              fontWeight: '500', 
+                              fontSize: '13px',
+                              color: '#f8fafc',
+                              flex: 1,
+                            }}>
+                              {dpp.material}
+                            </div>
+                            {/* Material quality badge */}
+                            <span style={{
+                              fontSize: '9px',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              background: dpp.material.includes('Organic') ? 'rgba(34, 197, 94, 0.2)' :
+                                         dpp.material.includes('Recycled') ? 'rgba(139, 92, 246, 0.2)' :
+                                         dpp.material.includes('100% Cotton') ? 'rgba(34, 197, 94, 0.15)' :
+                                         dpp.material.includes('Blend') ? 'rgba(251, 191, 36, 0.2)' :
+                                         'rgba(148, 163, 184, 0.2)',
+                              color: dpp.material.includes('Organic') ? '#22c55e' :
+                                    dpp.material.includes('Recycled') ? '#8b5cf6' :
+                                    dpp.material.includes('100% Cotton') ? '#059669' :
+                                    dpp.material.includes('Blend') ? '#f59e0b' :
+                                    '#94a3b8',
+                              fontWeight: '600',
+                            }}>
+                              {dpp.material.includes('Organic') ? 'ECO' :
+                               dpp.material.includes('Recycled') ? 'RCY' :
+                               dpp.material.includes('100% Cotton') ? '100%' :
+                               dpp.material.includes('Blend') ? 'MIX' :
+                               dpp.material.includes('Polyester') ? 'SYN' : ''}
+                            </span>
                           </div>
                           <div style={{ 
                             fontSize: '10px',
