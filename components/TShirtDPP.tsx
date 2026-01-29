@@ -22,6 +22,16 @@ const TShirtDPP = () => {
   const [currentDPP, setCurrentDPP] = useState<DPPType | null>(null);
   const [allDPPs, setAllDPPs] = useState<DPPType[]>([]);
   
+  // Debug: Log when currentDPP changes
+  useEffect(() => {
+    console.log('📌 currentDPP changed:', currentDPP ? {
+      id: currentDPP.id.slice(0, 10) + '...',
+      status: currentDPP.status,
+      material: currentDPP.material,
+      reward: currentDPP.lockedReward
+    } : 'null');
+  }, [currentDPP]);
+  
   // Form state
   const [consumerWallet, setConsumerWallet] = useState('');
   const [material, setMaterial] = useState('100% Organic Cotton');
@@ -417,6 +427,7 @@ const TShirtDPP = () => {
               </>
             ) : (
               <div style={{ textAlign: 'center' }}>
+                {console.log('🖼️ Rendering QR code view for DPP:', currentDPP.id)}
                 <div style={{
                   width: '220px',
                   height: '220px',
