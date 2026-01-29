@@ -434,9 +434,32 @@ const TShirtDPP = () => {
                     fontSize: '16px',
                     fontWeight: '600',
                     cursor: creating ? 'not-allowed' : 'pointer',
+                    opacity: creating ? 0.7 : 1,
+                    transform: creating ? 'scale(0.98)' : 'scale(1)',
+                    transition: 'all 0.15s ease',
+                    position: 'relative',
+                    overflow: 'hidden',
                   }}
                 >
-                  {creating ? '⏳ Creating...' : '🔒 Create DPP & Lock Reward'}
+                  {creating && (
+                    <span style={{
+                      display: 'inline-block',
+                      width: '14px',
+                      height: '14px',
+                      border: '2px solid rgba(255,255,255,0.3)',
+                      borderTopColor: 'white',
+                      borderRadius: '50%',
+                      animation: 'spin 0.6s linear infinite',
+                      marginRight: '8px',
+                      verticalAlign: 'middle',
+                    }} />
+                  )}
+                  {creating ? 'Creating on blockchain...' : '🔒 Create DPP & Lock Reward'}
+                  <style dangerouslySetInnerHTML={{__html: `
+                    @keyframes spin {
+                      to { transform: rotate(360deg); }
+                    }
+                  `}} />
                 </button>
               </>
             ) : (
@@ -1019,9 +1042,25 @@ const TShirtDPP = () => {
                         fontSize: '16px',
                         fontWeight: '600',
                         cursor: consumerWallet.trim() && !marking ? 'pointer' : 'not-allowed',
+                        opacity: marking ? 0.7 : 1,
+                        transform: marking ? 'scale(0.98)' : 'scale(1)',
+                        transition: 'all 0.15s ease',
                       }}
                     >
-                      {marking ? '⏳ Marking...' : '🏁 Mark End of Life'}
+                      {marking && (
+                        <span style={{
+                          display: 'inline-block',
+                          width: '14px',
+                          height: '14px',
+                          border: '2px solid rgba(255,255,255,0.3)',
+                          borderTopColor: 'white',
+                          borderRadius: '50%',
+                          animation: 'spin 0.6s linear infinite',
+                          marginRight: '8px',
+                          verticalAlign: 'middle',
+                        }} />
+                      )}
+                      {marking ? 'Processing...' : '🏁 Mark End of Life'}
                     </button>
                   </>
                 ) : (
@@ -1166,9 +1205,25 @@ const TShirtDPP = () => {
                     fontSize: '16px',
                     fontWeight: '600',
                     cursor: verifying ? 'not-allowed' : 'pointer',
+                    opacity: verifying ? 0.7 : 1,
+                    transform: verifying ? 'scale(0.98)' : 'scale(1)',
+                    transition: 'all 0.15s ease',
                   }}
                 >
-                  {verifying ? '⏳ Verifying...' : `✓ Verify Material & Unlock $${currentDPP.lockedReward.toFixed(2)}`}
+                  {verifying && (
+                    <span style={{
+                      display: 'inline-block',
+                      width: '14px',
+                      height: '14px',
+                      border: '2px solid rgba(255,255,255,0.3)',
+                      borderTopColor: 'white',
+                      borderRadius: '50%',
+                      animation: 'spin 0.6s linear infinite',
+                      marginRight: '8px',
+                      verticalAlign: 'middle',
+                    }} />
+                  )}
+                  {verifying ? 'Verifying on blockchain...' : `✓ Verify Material & Unlock $${currentDPP.lockedReward.toFixed(2)}`}
                 </button>
               </>
             )}
