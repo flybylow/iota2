@@ -46,8 +46,10 @@ const TShirtDPP = () => {
     console.log('═══════════════════════════════════════\n');
   }, [currentAccount]);
 
-  function loadDPPs() {
-    const dpps = storage.getAllDPPs();
+  async function loadDPPs() {
+    if (!currentAccount) return;
+    
+    const dpps = await storage.getDPPsByOwner(currentAccount.address);
     setAllDPPs(dpps);
     
     // If we have a current DPP, refresh it
@@ -90,26 +92,25 @@ const TShirtDPP = () => {
     if (result.success) {
       console.log('Output:');
       console.log('  Transaction ID:', result.transactionId);
-      console.log('  DPP Object ID:', result.dppId || 'Not extracted yet');
       console.log('  Status: DPP Created Successfully ✅');
       console.log('  View on Explorer: https://explorer.iota.org/txblock/' + result.transactionId + '?network=testnet');
       console.log('═══════════════════════════════════════\n');
       
-      if (result.dppId) {
-        // Fetch and display the newly created DPP
-        setTimeout(async () => {
-          const dpp = await storage.getDPPById(result.dppId!);
-          if (dpp) {
-            setCurrentDPP(dpp);
-            console.log('✅ DPP fetched and displayed:', dpp.id);
-          } else {
-            console.log('⚠️ Could not fetch DPP object');
-          }
-          loadDPPs();
-        }, 1000);
-      } else {
-        console.log('⚠️ DPP ID not found in transaction result, check console logs');
-      }
+      // Query all DPPs owned by user and show the most recent one
+      setTimeout(async () => {
+        console.log('🔍 Fetching your DPPs from blockchain...');
+        const dpps = await storage.getDPPsByOwner(currentAccount.address);
+        setAllDPPs(dpps);
+        
+        if (dpps.length > 0) {
+          // Show the most recently created DPP (last in the array)
+          const latestDPP = dpps[dpps.length - 1];
+          setCurrentDPP(latestDPP);
+          console.log('✅ Displaying latest DPP:', latestDPP.id);
+        } else {
+          console.log('⚠️ No DPPs found for your wallet yet');
+        }
+      }, 2000); // Wait 2 seconds for blockchain to index
     } else {
       console.error('Error:', result.error);
       alert('Failed to create DPP: ' + result.error);

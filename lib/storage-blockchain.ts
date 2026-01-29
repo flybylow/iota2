@@ -19,26 +19,55 @@ function getClient(): IotaClient {
 }
 
 /**
- * Query all DPP objects from the blockchain
+ * Get all DPP objects owned by an address
  */
-export async function getAllDPPs(): Promise<TShirtDPP[]> {
+export async function getDPPsByOwner(ownerAddress: string): Promise<TShirtDPP[]> {
   try {
     const client = getClient();
     
-    // Query all TShirtDPP objects
-    const response = await client.queryEvents({
-      query: { MoveEventType: `${PACKAGE_ID}::tshirt_dpp::DPPCreated` },
-      limit: 50,
+    // Query all objects owned by the address
+    const objects = await client.getOwnedObjects({
+      owner: ownerAddress,
+      filter: {
+        StructType: `${PACKAGE_ID}::tshirt_dpp::TShirtDPP`,
+      },
+      options: {
+        showContent: true,
+      },
     });
     
-    // For now, return empty array - we'll implement full object querying later
-    // This would require querying owned objects and parsing them
-    console.log('📊 DPP Created Events:', response.data.length);
-    return [];
+    const dpps: TShirtDPP[] = [];
+    
+    for (const obj of objects.data) {
+      if (obj.data?.content && obj.data.content.dataType === 'moveObject') {
+        const fields = obj.data.content.fields as any;
+        dpps.push({
+          id: fields.id.id,
+          material: fields.material,
+          lockedReward: Number(fields.locked_reward),
+          originalReward: Number(fields.locked_reward),
+          consumer: fields.consumer || null,
+          status: Number(fields.status),
+          createdAt: Date.now(),
+          manufacturer: 'Blockchain',
+        });
+      }
+    }
+    
+    console.log('📊 Found', dpps.length, 'DPPs owned by', ownerAddress.slice(0, 8) + '...');
+    return dpps;
   } catch (error) {
-    console.error('Error querying DPPs:', error);
+    console.error('Error querying DPPs by owner:', error);
     return [];
   }
+}
+
+/**
+ * Query all DPP objects from the blockchain (legacy)
+ */
+export async function getAllDPPs(): Promise<TShirtDPP[]> {
+  // This is deprecated - use getDPPsByOwner instead
+  return [];
 }
 
 /**
