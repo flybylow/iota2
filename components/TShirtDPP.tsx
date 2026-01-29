@@ -946,12 +946,100 @@ const TShirtDPP = () => {
               // SINGLE T-SHIRT VIEW (original)
               <div>
                 {!currentDPP ? (
-              <div style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
-                <div style={{ fontSize: '48px', marginBottom: '16px' }}>📷</div>
-                <p>Scan a DPP QR code to view t-shirt</p>
-                <p style={{ fontSize: '12px', marginTop: '8px' }}>
-                  (Create one in Manufacturer tab first)
-                </p>
+              <div>
+                <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                  <div style={{ fontSize: '48px', marginBottom: '12px' }}>📱</div>
+                  <h3 style={{ fontSize: '18px', color: '#f8fafc', marginBottom: '8px' }}>
+                    Scan & Claim Your T-Shirt
+                  </h3>
+                  <p style={{ fontSize: '13px', color: '#94a3b8' }}>
+                    Scan the QR code on your t-shirt tag to claim ownership
+                  </p>
+                </div>
+
+                <div style={{
+                  background: 'rgba(5, 150, 105, 0.1)',
+                  border: '1px solid rgba(5, 150, 105, 0.2)',
+                  borderRadius: '12px',
+                  padding: '16px',
+                  marginBottom: '20px',
+                }}>
+                  <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '12px' }}>
+                    💡 <strong style={{ color: '#059669' }}>How it works:</strong>
+                  </div>
+                  <ol style={{ fontSize: '12px', color: '#cbd5e1', lineHeight: '1.8', paddingLeft: '20px', margin: 0 }}>
+                    <li>Buy a t-shirt with a DPP tag</li>
+                    <li>Scan the QR code with your phone</li>
+                    <li>Enter the DPP ID below to claim it</li>
+                    <li>Sign the transaction to prove ownership</li>
+                  </ol>
+                </div>
+
+                <div style={{ marginBottom: '16px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '8px' }}>
+                    Enter DPP ID from QR Code
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="0x... (paste DPP ID here)"
+                    style={{
+                      width: '100%',
+                      padding: '14px',
+                      borderRadius: '12px',
+                      border: '1px solid #334155',
+                      background: '#0f172a',
+                      color: '#f8fafc',
+                      fontSize: '13px',
+                      fontFamily: 'monospace',
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const input = e.currentTarget.value.trim();
+                        if (input) {
+                          // Find DPP in owned DPPs
+                          const dpp = allDPPs.find(d => d.id === input || d.id.includes(input));
+                          if (dpp) {
+                            setCurrentDPP(dpp);
+                            e.currentTarget.value = '';
+                            console.log('✅ T-shirt claimed:', dpp.id);
+                          } else {
+                            alert('DPP not found. Make sure you own this t-shirt or create one in the Manufacturer tab first.');
+                          }
+                        }
+                      }
+                    }}
+                  />
+                  <div style={{ fontSize: '11px', color: '#64748b', marginTop: '8px' }}>
+                    Press Enter to claim • Or go to "View All" to see your collection
+                  </div>
+                </div>
+
+                <div style={{
+                  textAlign: 'center',
+                  padding: '16px',
+                  background: 'rgba(15, 23, 42, 0.4)',
+                  borderRadius: '8px',
+                  fontSize: '12px',
+                  color: '#64748b',
+                }}>
+                  Don't have a t-shirt yet? <br/>
+                  <button
+                    onClick={() => setActiveTab('manufacturer')}
+                    style={{
+                      marginTop: '8px',
+                      padding: '6px 12px',
+                      borderRadius: '6px',
+                      border: '1px solid #334155',
+                      background: 'transparent',
+                      color: '#059669',
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                    }}
+                  >
+                    Create a Demo DPP →
+                  </button>
+                </div>
               </div>
             ) : currentDPP.status === DPP_STATUS.RECYCLED ? (
               <div style={{ textAlign: 'center' }}>
