@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { TShirtDPP as DPPType, DPP_STATUS } from '@/lib/types';
-import * as storage from '@/lib/storage';
+import * as storage from '@/lib/storage-blockchain';
+import { useCurrentAccount, useSignAndExecuteTransaction, ConnectButton } from '@iota/dapp-kit';
 
 interface Tab {
   id: 'manufacturer' | 'consumer' | 'recycler';
@@ -11,6 +12,10 @@ interface Tab {
 }
 
 const TShirtDPP = () => {
+  // Wallet connection
+  const currentAccount = useCurrentAccount();
+  const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+  
   const [activeTab, setActiveTab] = useState<'manufacturer' | 'consumer' | 'recycler'>('manufacturer');
   
   // Current DPP being viewed
@@ -33,12 +38,13 @@ const TShirtDPP = () => {
     console.log('═══════════════════════════════════════');
     console.log('🎬 T-SHIRT DPP APP INITIALIZED');
     console.log('═══════════════════════════════════════');
-    console.log('App Version: localStorage Prototype');
+    console.log('App Version: IOTA Blockchain');
     console.log('TypeScript: ✅ Properly structured');
-    console.log('Storage: localStorage (ready for blockchain swap)');
-    console.log('Status: Ready for demo ✅');
+    console.log('Storage: IOTA Testnet 🚀');
+    console.log('Wallet:', currentAccount?.address || 'Not connected');
+    console.log('Status: Ready for blockchain transactions ✅');
     console.log('═══════════════════════════════════════\n');
-  }, []);
+  }, [currentAccount]);
 
   function loadDPPs() {
     const dpps = storage.getAllDPPs();
@@ -59,30 +65,39 @@ const TShirtDPP = () => {
   };
 
   async function handleCreateDPP() {
+    if (!currentAccount) {
+      alert('Please connect your wallet first!');
+      return;
+    }
+    
     console.log('═══════════════════════════════════════');
     console.log('🏭 MANUFACTURER: CREATE DPP');
     console.log('═══════════════════════════════════════');
     console.log('Input:');
     console.log('  Material:', material);
     console.log('  Locked Reward: $', lockedReward.toFixed(2));
+    console.log('  Recipient:', currentAccount.address);
     
     setCreating(true);
     
     const result = await storage.createDPP(
       material,
       lockedReward,
-      'EcoThreads Manufacturing' // In real app, would be currentAccount.address
+      currentAccount.address,
+      signAndExecute
     );
     
     if (result.success) {
       console.log('Output:');
       console.log('  Transaction ID:', result.transactionId);
       console.log('  Status: DPP Created Successfully ✅');
+      console.log('  View on Explorer: https://explorer.iota.org/txblock/' + result.transactionId + '?network=testnet');
       console.log('═══════════════════════════════════════\n');
       
-      loadDPPs();
-      const dpps = storage.getAllDPPs();
-      setCurrentDPP(dpps[dpps.length - 1]); // Show the newly created DPP
+      // Wait a bit for blockchain to index
+      setTimeout(() => {
+        loadDPPs();
+      }, 2000);
     } else {
       console.error('Error:', result.error);
       alert('Failed to create DPP: ' + result.error);
@@ -92,26 +107,29 @@ const TShirtDPP = () => {
   }
 
   async function handleMarkEndOfLife() {
-    if (!currentDPP || !consumerWallet.trim()) return;
+    if (!currentDPP || !currentAccount) return;
     
     console.log('═══════════════════════════════════════');
     console.log('👤 CONSUMER: MARK END OF LIFE');
     console.log('═══════════════════════════════════════');
     console.log('Input:');
     console.log('  DPP ID:', currentDPP.id);
-    console.log('  Consumer Wallet:', consumerWallet);
+    console.log('  Consumer Wallet:', currentAccount.address);
     
     setMarking(true);
     
-    const result = await storage.markEndOfLife(currentDPP.id, consumerWallet);
+    const result = await storage.markEndOfLife(currentDPP.id, signAndExecute);
     
     if (result.success) {
       console.log('Output:');
       console.log('  Transaction ID:', result.transactionId);
       console.log('  Status: End of Life Marked ✅');
+      console.log('  View on Explorer: https://explorer.iota.org/txblock/' + result.transactionId + '?network=testnet');
       console.log('═══════════════════════════════════════\n');
       
-      loadDPPs();
+      setTimeout(() => {
+        loadDPPs();
+      }, 2000);
     } else {
       console.error('Error:', result.error);
       alert('Failed to mark end of life: ' + result.error);
@@ -121,7 +139,7 @@ const TShirtDPP = () => {
   }
 
   async function handleVerifyAndUnlock() {
-    if (!currentDPP) return;
+    if (!currentDPP || !currentAccount) return;
     
     console.log('═══════════════════════════════════════');
     console.log('♻️ RECYCLER: VERIFY & UNLOCK');
@@ -133,18 +151,18 @@ const TShirtDPP = () => {
     
     setVerifying(true);
     
-    const result = await storage.verifyAndUnlock(
-      currentDPP.id,
-      'RecyclingFacility' // In real app, would be currentAccount.address
-    );
+    const result = await storage.verifyAndUnlock(currentDPP.id, signAndExecute);
     
     if (result.success) {
       console.log('Output:');
       console.log('  Transaction ID:', result.transactionId);
       console.log('  Status: Reward Unlocked ✅');
+      console.log('  View on Explorer: https://explorer.iota.org/txblock/' + result.transactionId + '?network=testnet');
       console.log('═══════════════════════════════════════\n');
       
-      loadDPPs();
+      setTimeout(() => {
+        loadDPPs();
+      }, 2000);
     } else {
       console.error('Error:', result.error);
       alert('Failed to verify and unlock: ' + result.error);
@@ -191,21 +209,41 @@ const TShirtDPP = () => {
       padding: '24px',
     }}>
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <h1 style={{ 
-          fontSize: '28px', 
-          fontWeight: '700',
-          marginBottom: '8px',
-          letterSpacing: '-0.5px'
-        }}>
-          👕 T-Shirt Digital Product Passport
-        </h1>
-        <p style={{ color: '#94a3b8', fontSize: '14px' }}>
-          Track products • Verify materials • Unlock recycling rewards
-        </p>
-        <p style={{ color: '#64748b', fontSize: '12px', marginTop: '4px' }}>
-          localStorage • TypeScript • Ready for blockchain
-        </p>
+      <div style={{ marginBottom: '32px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <div>
+            <h1 style={{ 
+              fontSize: '28px', 
+              fontWeight: '700',
+              marginBottom: '8px',
+              letterSpacing: '-0.5px'
+            }}>
+              👕 T-Shirt Digital Product Passport
+            </h1>
+            <p style={{ color: '#94a3b8', fontSize: '14px' }}>
+              Track products • Verify materials • Unlock recycling rewards
+            </p>
+            <p style={{ color: '#64748b', fontSize: '12px', marginTop: '4px' }}>
+              🚀 IOTA Testnet • Blockchain Connected
+            </p>
+          </div>
+          <div>
+            <ConnectButton />
+          </div>
+        </div>
+        {currentAccount && (
+          <div style={{ 
+            textAlign: 'center',
+            padding: '8px 16px',
+            background: '#22c55e20',
+            borderRadius: '8px',
+            fontSize: '12px',
+            color: '#22c55e',
+            fontFamily: 'monospace'
+          }}>
+            ✅ Connected: {currentAccount.address.slice(0, 8)}...{currentAccount.address.slice(-6)}
+          </div>
+        )}
       </div>
 
       {/* Tabs */}
