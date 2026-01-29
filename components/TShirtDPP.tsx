@@ -589,21 +589,35 @@ const TShirtDPP = () => {
                           console.log('📌 Selected DPP:', dpp.id);
                         }}
                         style={{
-                          background: '#0f172a',
-                          border: '2px solid #334155',
+                          background: dpp.status === DPP_STATUS.ACTIVE
+                            ? 'linear-gradient(135deg, #064e3b 0%, #0f172a 100%)' // Dark green tint
+                            : dpp.status === DPP_STATUS.END_OF_LIFE
+                            ? 'linear-gradient(135deg, #78350f 0%, #0f172a 100%)' // Dark orange tint
+                            : 'linear-gradient(135deg, #4c1d95 0%, #0f172a 100%)', // Dark purple tint
+                          border: `2px solid ${
+                            dpp.status === DPP_STATUS.ACTIVE ? '#22c55e' :
+                            dpp.status === DPP_STATUS.END_OF_LIFE ? '#f59e0b' : '#8b5cf6'
+                          }`,
                           borderRadius: '16px',
                           padding: '24px',
                           cursor: 'pointer',
                           transition: 'all 0.2s ease',
                           position: 'relative',
+                          opacity: dpp.status === DPP_STATUS.RECYCLED ? 0.85 : 1,
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.borderColor = '#059669';
+                          const hoverColor = dpp.status === DPP_STATUS.ACTIVE ? '#22c55e' :
+                                            dpp.status === DPP_STATUS.END_OF_LIFE ? '#f59e0b' : '#8b5cf6';
+                          e.currentTarget.style.borderColor = hoverColor;
                           e.currentTarget.style.transform = 'translateY(-4px)';
+                          e.currentTarget.style.boxShadow = `0 8px 24px ${hoverColor}40`;
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.borderColor = '#334155';
+                          const baseColor = dpp.status === DPP_STATUS.ACTIVE ? '#22c55e' :
+                                           dpp.status === DPP_STATUS.END_OF_LIFE ? '#f59e0b' : '#8b5cf6';
+                          e.currentTarget.style.borderColor = baseColor;
                           e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = 'none';
                         }}
                       >
                         {/* Status Badge */}
@@ -624,24 +638,51 @@ const TShirtDPP = () => {
                            dpp.status === DPP_STATUS.END_OF_LIFE ? '⏳' : '♻️'}
                         </div>
 
-                        {/* T-Shirt Visual */}
+                        {/* T-Shirt Visual with Color */}
                         <div style={{
-                          fontSize: '80px',
+                          position: 'relative',
                           textAlign: 'center',
                           marginBottom: '16px',
-                          filter: dpp.status === DPP_STATUS.RECYCLED ? 'grayscale(50%) opacity(0.6)' : 'none',
                         }}>
-                          👕
+                          {/* Colored background circle behind t-shirt */}
+                          <div style={{
+                            width: '100px',
+                            height: '100px',
+                            margin: '0 auto',
+                            borderRadius: '50%',
+                            background: dpp.status === DPP_STATUS.ACTIVE 
+                              ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' // Green - Fresh/Active
+                              : dpp.status === DPP_STATUS.END_OF_LIFE
+                              ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' // Orange - End of Life
+                              : 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', // Purple - Recycled
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '60px',
+                            filter: dpp.status === DPP_STATUS.RECYCLED ? 'grayscale(30%) opacity(0.7)' : 'none',
+                            boxShadow: dpp.status === DPP_STATUS.ACTIVE 
+                              ? '0 0 20px #22c55e40'
+                              : dpp.status === DPP_STATUS.END_OF_LIFE
+                              ? '0 0 20px #f59e0b40'
+                              : '0 0 20px #8b5cf640',
+                          }}>
+                            👕
+                          </div>
                         </div>
 
                         {/* DPP Info on T-Shirt */}
                         <div style={{
-                          background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                          background: dpp.status === DPP_STATUS.ACTIVE
+                            ? 'linear-gradient(135deg, #059669 0%, #047857 100%)' // Green for active
+                            : dpp.status === DPP_STATUS.END_OF_LIFE
+                            ? 'linear-gradient(135deg, #d97706 0%, #b45309 100%)' // Orange for EOL
+                            : 'linear-gradient(135deg, #6b21a8 0%, #581c87 100%)', // Purple for recycled
                           borderRadius: '8px',
                           padding: '12px',
                           marginBottom: '12px',
                           fontSize: '11px',
                           color: '#fff',
+                          opacity: dpp.status === DPP_STATUS.RECYCLED ? 0.7 : 1,
                         }}>
                           <div style={{ fontWeight: '600', marginBottom: '4px', fontSize: '12px' }}>
                             {dpp.material}
