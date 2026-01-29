@@ -1,36 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# T-Shirt Digital Product Passport UI
+
+A fully TypeScript-structured UI for the T-Shirt DPP (Digital Product Passport) system, ready for IOTA blockchain integration.
+
+## Overview
+
+This UI demonstrates the complete lifecycle of a Digital Product Passport for t-shirts:
+
+- **Manufacturer**: Creates DPPs with material information and locked recycling rewards
+- **Consumer**: Views product information and marks end-of-life for recycling
+- **Recycler**: Verifies materials and unlocks rewards for consumers
+
+## Features
+
+- 🏭 **Manufacturer DPP creation** with locked rewards
+- 👤 **Consumer product tracking** and end-of-life marking  
+- ♻️ **Recycler verification** and reward unlocking
+- 📱 **Mock QR code system** for product tracking
+- 💾 **localStorage persistence** - data survives page refreshes
+- 🎨 **Modern, responsive UI** with IOTA branding
+- 📘 **Full TypeScript** - Type-safe with proper interfaces
+- 🔄 **Blockchain-ready architecture** - Easy to swap localStorage for IOTA
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the app.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Architecture
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+**Current: localStorage (Production-Ready)**
+```
+UI Component → Storage Service → localStorage
+     ↓              ↓
+  (same)    (easy to swap)
+```
 
-## Learn More
+**Future: IOTA Blockchain (30 min swap)**
+```
+UI Component → Storage Service → IOTA Testnet
+     ↓              ↓
+  (no changes)  (swap functions)
+```
 
-To learn more about Next.js, take a look at the following resources:
+See `BLOCKCHAIN_INTEGRATION.md` for swap guide.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+tshirt-dpp-ui/
+├── app/
+│   ├── page.tsx                    # Main page
+│   ├── layout.tsx                  # Root layout
+│   └── globals.css                 # Global styles
+├── components/
+│   └── TShirtDPP.tsx              # Main UI component
+├── lib/
+│   ├── types.ts                   # TypeScript types (matches Move contract)
+│   └── storage.ts                 # Storage service (localStorage → blockchain ready)
+├── BLOCKCHAIN_INTEGRATION.md      # Guide to swap to IOTA
+└── package.json
+```
 
-## Deploy on Vercel
+## Key Files
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **`lib/types.ts`** - TypeScript interfaces matching Move smart contract structures
+- **`lib/storage.ts`** - Storage abstraction layer (currently localStorage, ready for blockchain)
+- **`components/TShirtDPP.tsx`** - UI component (doesn't need to change when swapping storage)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Smart Contract
+
+This UI connects to the `tshirt_dpp` Move smart contract located in `../tshirt_dpp/`.
+
+## Built With
+
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS
+- IOTA SDK (for future blockchain integration)
+
+## Hackathon
+
+Built for **MasterZ × IOTA Hackathon** by **Tabulas**
+
+Theme: Circular Economy Infrastructure
