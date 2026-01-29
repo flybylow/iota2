@@ -589,105 +589,101 @@ const TShirtDPP = () => {
                           console.log('📌 Selected DPP:', dpp.id);
                         }}
                         style={{
-                          background: dpp.status === DPP_STATUS.ACTIVE
-                            ? 'linear-gradient(135deg, #064e3b 0%, #0f172a 100%)' // Dark green tint
-                            : dpp.status === DPP_STATUS.END_OF_LIFE
-                            ? 'linear-gradient(135deg, #78350f 0%, #0f172a 100%)' // Dark orange tint
-                            : 'linear-gradient(135deg, #4c1d95 0%, #0f172a 100%)', // Dark purple tint
-                          border: `2px solid ${
-                            dpp.status === DPP_STATUS.ACTIVE ? '#22c55e' :
-                            dpp.status === DPP_STATUS.END_OF_LIFE ? '#f59e0b' : '#8b5cf6'
+                          background: 'rgba(15, 23, 42, 0.4)',
+                          backdropFilter: 'blur(8px)',
+                          border: `1px solid ${
+                            dpp.status === DPP_STATUS.ACTIVE ? 'rgba(34, 197, 94, 0.3)' :
+                            dpp.status === DPP_STATUS.END_OF_LIFE ? 'rgba(245, 158, 11, 0.3)' : 
+                            'rgba(139, 92, 246, 0.25)'
                           }`,
-                          borderRadius: '16px',
-                          padding: '24px',
+                          borderRadius: '12px',
+                          padding: '20px',
                           cursor: 'pointer',
-                          transition: 'all 0.2s ease',
+                          transition: 'all 0.15s ease',
                           position: 'relative',
-                          opacity: dpp.status === DPP_STATUS.RECYCLED ? 0.85 : 1,
                         }}
                         onMouseEnter={(e) => {
-                          const hoverColor = dpp.status === DPP_STATUS.ACTIVE ? '#22c55e' :
-                                            dpp.status === DPP_STATUS.END_OF_LIFE ? '#f59e0b' : '#8b5cf6';
-                          e.currentTarget.style.borderColor = hoverColor;
-                          e.currentTarget.style.transform = 'translateY(-4px)';
-                          e.currentTarget.style.boxShadow = `0 8px 24px ${hoverColor}40`;
+                          const hoverBorder = dpp.status === DPP_STATUS.ACTIVE ? 'rgba(34, 197, 94, 0.5)' :
+                                            dpp.status === DPP_STATUS.END_OF_LIFE ? 'rgba(245, 158, 11, 0.5)' : 
+                                            'rgba(139, 92, 246, 0.4)';
+                          e.currentTarget.style.borderColor = hoverBorder;
+                          e.currentTarget.style.background = 'rgba(15, 23, 42, 0.6)';
+                          e.currentTarget.style.transform = 'translateY(-2px)';
                         }}
                         onMouseLeave={(e) => {
-                          const baseColor = dpp.status === DPP_STATUS.ACTIVE ? '#22c55e' :
-                                           dpp.status === DPP_STATUS.END_OF_LIFE ? '#f59e0b' : '#8b5cf6';
-                          e.currentTarget.style.borderColor = baseColor;
+                          const baseBorder = dpp.status === DPP_STATUS.ACTIVE ? 'rgba(34, 197, 94, 0.3)' :
+                                           dpp.status === DPP_STATUS.END_OF_LIFE ? 'rgba(245, 158, 11, 0.3)' : 
+                                           'rgba(139, 92, 246, 0.25)';
+                          e.currentTarget.style.borderColor = baseBorder;
+                          e.currentTarget.style.background = 'rgba(15, 23, 42, 0.4)';
                           e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = 'none';
                         }}
                       >
-                        {/* Status Badge */}
+                        {/* Status Badge - Minimal */}
                         <div style={{
                           position: 'absolute',
-                          top: '12px',
-                          right: '12px',
-                          fontSize: '10px',
-                          padding: '4px 8px',
-                          borderRadius: '6px',
-                          background: dpp.status === DPP_STATUS.ACTIVE ? '#22c55e20' :
-                                      dpp.status === DPP_STATUS.END_OF_LIFE ? '#f59e0b20' : '#8b5cf620',
+                          top: '10px',
+                          right: '10px',
+                          fontSize: '9px',
+                          padding: '3px 7px',
+                          borderRadius: '4px',
+                          background: dpp.status === DPP_STATUS.ACTIVE ? 'rgba(34, 197, 94, 0.15)' :
+                                      dpp.status === DPP_STATUS.END_OF_LIFE ? 'rgba(245, 158, 11, 0.15)' : 
+                                      'rgba(139, 92, 246, 0.15)',
+                          border: `1px solid ${
+                            dpp.status === DPP_STATUS.ACTIVE ? 'rgba(34, 197, 94, 0.3)' :
+                            dpp.status === DPP_STATUS.END_OF_LIFE ? 'rgba(245, 158, 11, 0.3)' :
+                            'rgba(139, 92, 246, 0.3)'
+                          }`,
                           color: dpp.status === DPP_STATUS.ACTIVE ? '#22c55e' :
                                  dpp.status === DPP_STATUS.END_OF_LIFE ? '#f59e0b' : '#8b5cf6',
-                          fontWeight: '600',
+                          fontWeight: '500',
                         }}>
                           {dpp.status === DPP_STATUS.ACTIVE ? '✓' : 
                            dpp.status === DPP_STATUS.END_OF_LIFE ? '⏳' : '♻️'}
                         </div>
 
-                        {/* T-Shirt Visual with Color */}
+                        {/* T-Shirt Visual - Minimal */}
                         <div style={{
-                          position: 'relative',
                           textAlign: 'center',
                           marginBottom: '16px',
+                          fontSize: '64px',
+                          opacity: dpp.status === DPP_STATUS.RECYCLED ? 0.5 : 0.9,
+                          filter: dpp.status === DPP_STATUS.RECYCLED ? 'grayscale(70%)' : 'none',
                         }}>
-                          {/* Colored background circle behind t-shirt */}
-                          <div style={{
-                            width: '100px',
-                            height: '100px',
-                            margin: '0 auto',
-                            borderRadius: '50%',
-                            background: dpp.status === DPP_STATUS.ACTIVE 
-                              ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)' // Green - Fresh/Active
-                              : dpp.status === DPP_STATUS.END_OF_LIFE
-                              ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' // Orange - End of Life
-                              : 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)', // Purple - Recycled
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '60px',
-                            filter: dpp.status === DPP_STATUS.RECYCLED ? 'grayscale(30%) opacity(0.7)' : 'none',
-                            boxShadow: dpp.status === DPP_STATUS.ACTIVE 
-                              ? '0 0 20px #22c55e40'
-                              : dpp.status === DPP_STATUS.END_OF_LIFE
-                              ? '0 0 20px #f59e0b40'
-                              : '0 0 20px #8b5cf640',
-                          }}>
-                            👕
-                          </div>
+                          👕
                         </div>
 
-                        {/* DPP Info on T-Shirt */}
+                        {/* DPP Info - Minimal */}
                         <div style={{
                           background: dpp.status === DPP_STATUS.ACTIVE
-                            ? 'linear-gradient(135deg, #059669 0%, #047857 100%)' // Green for active
+                            ? 'rgba(34, 197, 94, 0.1)'
                             : dpp.status === DPP_STATUS.END_OF_LIFE
-                            ? 'linear-gradient(135deg, #d97706 0%, #b45309 100%)' // Orange for EOL
-                            : 'linear-gradient(135deg, #6b21a8 0%, #581c87 100%)', // Purple for recycled
-                          borderRadius: '8px',
-                          padding: '12px',
+                            ? 'rgba(245, 158, 11, 0.1)'
+                            : 'rgba(139, 92, 246, 0.1)',
+                          border: `1px solid ${
+                            dpp.status === DPP_STATUS.ACTIVE ? 'rgba(34, 197, 94, 0.2)' :
+                            dpp.status === DPP_STATUS.END_OF_LIFE ? 'rgba(245, 158, 11, 0.2)' :
+                            'rgba(139, 92, 246, 0.2)'
+                          }`,
+                          borderRadius: '6px',
+                          padding: '10px',
                           marginBottom: '12px',
                           fontSize: '11px',
-                          color: '#fff',
-                          opacity: dpp.status === DPP_STATUS.RECYCLED ? 0.7 : 1,
                         }}>
-                          <div style={{ fontWeight: '600', marginBottom: '4px', fontSize: '12px' }}>
+                          <div style={{ 
+                            fontWeight: '500', 
+                            marginBottom: '4px', 
+                            fontSize: '13px',
+                            color: '#f8fafc',
+                          }}>
                             {dpp.material}
                           </div>
-                          <div style={{ opacity: 0.9, fontSize: '10px' }}>
+                          <div style={{ 
+                            fontSize: '10px',
+                            color: '#94a3b8',
+                            fontFamily: 'monospace',
+                          }}>
                             {dpp.id.slice(0, 8)}...{dpp.id.slice(-4)}
                           </div>
                         </div>
