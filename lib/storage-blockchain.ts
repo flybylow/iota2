@@ -150,34 +150,43 @@ export async function createDPP(
     
     return new Promise((resolve) => {
       signAndExecute(
-        { transaction: tx },
+        { 
+          transaction: tx,
+          options: {
+            showEffects: true,
+            showObjectChanges: true,
+          }
+        },
         {
           onSuccess: (result: any) => {
             console.log('✅ DPP Created on blockchain:', result.digest);
-            console.log('📋 Full transaction result:', result);
+            console.log('📋 Full transaction result:', JSON.stringify(result, null, 2));
             
             // Extract the DPP object ID from created objects
-            // The created objects are in result.effects.created
             let dppId: string | undefined;
             
-            if (result.effects?.created) {
-              // Find the TShirtDPP object (not the UpgradeCap or other objects)
-              for (const obj of result.effects.created) {
-                const owner = obj.owner;
-                // Check if it's owned by an address (not immutable, not shared)
-                if (owner && typeof owner === 'object' && 'AddressOwner' in owner) {
-                  // This should be the TShirtDPP object
-                  dppId = obj.reference?.objectId;
+            // Check objectChanges first (most reliable)
+            if (result.objectChanges) {
+              console.log('🔍 Checking objectChanges...');
+              for (const change of result.objectChanges) {
+                console.log('  Change:', change.type, change.objectType);
+                if (change.type === 'created' && change.objectType?.includes('TShirtDPP')) {
+                  dppId = change.objectId;
+                  console.log('  ✅ Found TShirtDPP:', dppId);
                   break;
                 }
               }
             }
             
-            // Also check objectChanges as a fallback
-            if (!dppId && result.objectChanges) {
-              for (const change of result.objectChanges) {
-                if (change.type === 'created' && change.objectType?.includes('TShirtDPP')) {
-                  dppId = change.objectId;
+            // Fallback: check effects.created
+            if (!dppId && result.effects?.created) {
+              console.log('🔍 Checking effects.created...');
+              for (const obj of result.effects.created) {
+                const owner = obj.owner;
+                console.log('  Object:', obj.reference?.objectId, 'Owner:', owner);
+                if (owner && typeof owner === 'object' && 'AddressOwner' in owner) {
+                  dppId = obj.reference?.objectId;
+                  console.log('  ✅ Found address-owned object:', dppId);
                   break;
                 }
               }
