@@ -87,22 +87,29 @@ const TShirtDPP = () => {
       signAndExecute
     );
     
-    if (result.success && result.dppId) {
+    if (result.success) {
       console.log('Output:');
       console.log('  Transaction ID:', result.transactionId);
-      console.log('  DPP Object ID:', result.dppId);
+      console.log('  DPP Object ID:', result.dppId || 'Not extracted yet');
       console.log('  Status: DPP Created Successfully ✅');
       console.log('  View on Explorer: https://explorer.iota.org/txblock/' + result.transactionId + '?network=testnet');
       console.log('═══════════════════════════════════════\n');
       
-      // Fetch and display the newly created DPP
-      setTimeout(async () => {
-        const dpp = await storage.getDPPById(result.dppId!);
-        if (dpp) {
-          setCurrentDPP(dpp);
-        }
-        loadDPPs();
-      }, 1000);
+      if (result.dppId) {
+        // Fetch and display the newly created DPP
+        setTimeout(async () => {
+          const dpp = await storage.getDPPById(result.dppId!);
+          if (dpp) {
+            setCurrentDPP(dpp);
+            console.log('✅ DPP fetched and displayed:', dpp.id);
+          } else {
+            console.log('⚠️ Could not fetch DPP object');
+          }
+          loadDPPs();
+        }, 1000);
+      } else {
+        console.log('⚠️ DPP ID not found in transaction result, check console logs');
+      }
     } else {
       console.error('Error:', result.error);
       alert('Failed to create DPP: ' + result.error);
