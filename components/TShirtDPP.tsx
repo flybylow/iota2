@@ -6,7 +6,7 @@ import * as storage from '@/lib/storage-blockchain';
 import { useCurrentAccount, useSignAndExecuteTransaction, ConnectButton } from '@iota/dapp-kit';
 
 interface Tab {
-  id: 'overview' | 'manufacturer' | 'consumer' | 'recycler';
+  id: 'manufacturer' | 'consumer' | 'recycler';
   label: string;
   color: string;
 }
@@ -16,7 +16,7 @@ const TShirtDPP = () => {
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
   
-  const [activeTab, setActiveTab] = useState<'overview' | 'manufacturer' | 'consumer' | 'recycler'>('overview');
+  const [activeTab, setActiveTab] = useState<'manufacturer' | 'consumer' | 'recycler'>('manufacturer');
   
   // Current DPP being viewed
   const [currentDPP, setCurrentDPP] = useState<DPPType | null>(null);
@@ -71,7 +71,7 @@ const TShirtDPP = () => {
     }
   }
 
-  const handleTabChange = (tabId: 'overview' | 'manufacturer' | 'consumer' | 'recycler') => {
+  const handleTabChange = (tabId: 'manufacturer' | 'consumer' | 'recycler') => {
     console.log('🔄 TAB CHANGE:', activeTab, '→', tabId);
     setActiveTab(tabId);
   };
@@ -218,8 +218,10 @@ const TShirtDPP = () => {
     setConsumerWallet(currentAccount.address);
   }
 
+  // State for showing all t-shirts overview
+  const [showAllTShirts, setShowAllTShirts] = useState(false);
+  
   const tabs: Tab[] = [
-    { id: 'overview', label: '📊 Overview', color: '#8b5cf6' },
     { id: 'manufacturer', label: '🏭 Manufacturer', color: '#2563eb' },
     { id: 'consumer', label: '👤 Consumer', color: '#059669' },
     { id: 'recycler', label: '♻️ Recycler', color: '#d97706' },
@@ -352,146 +354,13 @@ const TShirtDPP = () => {
 
       {/* Content Card */}
       <div style={{
-        maxWidth: activeTab === 'overview' ? '1200px' : '400px',
+        maxWidth: (activeTab === 'consumer' && showAllTShirts) ? '1400px' : '400px',
         margin: '0 auto',
         background: '#1e293b',
         borderRadius: '20px',
         padding: '32px',
         border: '1px solid #334155',
       }}>
-        
-        {/* OVERVIEW */}
-        {activeTab === 'overview' && (
-          <div>
-            <div style={{ marginBottom: '24px', textAlign: 'center' }}>
-              <h2 style={{ fontSize: '24px', marginBottom: '8px', color: '#8b5cf6' }}>
-                📊 My Digital Product Passports
-              </h2>
-              <p style={{ color: '#94a3b8', fontSize: '14px' }}>
-                {allDPPs.length} {allDPPs.length === 1 ? 'DPP' : 'DPPs'} in your wallet
-              </p>
-            </div>
-
-            {!currentAccount ? (
-              <div style={{
-                textAlign: 'center',
-                padding: '48px 24px',
-                color: '#94a3b8'
-              }}>
-                <p style={{ fontSize: '16px', marginBottom: '16px' }}>
-                  👛 Connect your wallet to view your DPPs
-                </p>
-              </div>
-            ) : allDPPs.length === 0 ? (
-              <div style={{
-                textAlign: 'center',
-                padding: '48px 24px',
-                color: '#94a3b8'
-              }}>
-                <p style={{ fontSize: '16px', marginBottom: '8px' }}>
-                  No DPPs found in your wallet
-                </p>
-                <p style={{ fontSize: '14px' }}>
-                  Go to the Manufacturer tab to create one!
-                </p>
-              </div>
-            ) : (
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-                gap: '16px',
-              }}>
-                {allDPPs.map((dpp) => (
-                  <div
-                    key={dpp.id}
-                    onClick={() => {
-                      setCurrentDPP(dpp);
-                      console.log('📌 Selected DPP:', dpp.id);
-                    }}
-                    style={{
-                      padding: '20px',
-                      background: currentDPP?.id === dpp.id ? '#8b5cf620' : '#0f172a',
-                      border: currentDPP?.id === dpp.id ? '2px solid #8b5cf6' : '1px solid #334155',
-                      borderRadius: '12px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      if (currentDPP?.id !== dpp.id) {
-                        e.currentTarget.style.borderColor = '#475569';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (currentDPP?.id !== dpp.id) {
-                        e.currentTarget.style.borderColor = '#334155';
-                      }
-                    }}
-                  >
-                    <div style={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between', 
-                      alignItems: 'center',
-                      marginBottom: '12px'
-                    }}>
-                      <span style={{ fontSize: '12px', color: '#64748b' }}>
-                        {dpp.id.slice(0, 8)}...{dpp.id.slice(-6)}
-                      </span>
-                      <span style={{ 
-                        fontSize: '12px',
-                        padding: '4px 8px',
-                        borderRadius: '6px',
-                        background: dpp.status === DPP_STATUS.ACTIVE ? '#22c55e20' :
-                                    dpp.status === DPP_STATUS.END_OF_LIFE ? '#f59e0b20' : '#8b5cf620',
-                        color: dpp.status === DPP_STATUS.ACTIVE ? '#22c55e' :
-                               dpp.status === DPP_STATUS.END_OF_LIFE ? '#f59e0b' : '#8b5cf6',
-                      }}>
-                        {getStatusLabel(dpp.status)}
-                      </span>
-                    </div>
-
-                    <div style={{ marginBottom: '12px' }}>
-                      <div style={{ fontSize: '14px', color: '#f8fafc', marginBottom: '4px' }}>
-                        {dpp.material}
-                      </div>
-                    </div>
-
-                    <div style={{ 
-                      display: 'flex', 
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      paddingTop: '12px',
-                      borderTop: '1px solid #334155'
-                    }}>
-                      <span style={{ fontSize: '12px', color: '#94a3b8' }}>
-                        Reward
-                      </span>
-                      <span style={{ 
-                        fontSize: '16px', 
-                        fontWeight: '600',
-                        color: dpp.status === DPP_STATUS.RECYCLED ? '#64748b' : '#22c55e'
-                      }}>
-                        ${dpp.status === DPP_STATUS.RECYCLED 
-                          ? (dpp.originalReward || 0).toFixed(2) 
-                          : dpp.lockedReward.toFixed(2)}
-                      </span>
-                    </div>
-
-                    {dpp.status === DPP_STATUS.RECYCLED && (
-                      <div style={{
-                        marginTop: '8px',
-                        fontSize: '11px',
-                        color: '#64748b',
-                        textAlign: 'center'
-                      }}>
-                        ✅ Claimed
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
         
         {/* MANUFACTURER VIEW */}
         {activeTab === 'manufacturer' && (
@@ -668,11 +537,161 @@ const TShirtDPP = () => {
         {/* CONSUMER VIEW */}
         {activeTab === 'consumer' && (
           <div>
-            <h2 style={{ fontSize: '20px', marginBottom: '24px', color: '#059669' }}>
-              👤 My T-Shirt
-            </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+              <h2 style={{ fontSize: '20px', color: '#059669', margin: 0 }}>
+                {showAllTShirts ? '👕 All My T-Shirts' : '👤 My T-Shirt'}
+              </h2>
+              <button
+                onClick={() => setShowAllTShirts(!showAllTShirts)}
+                style={{
+                  padding: '8px 16px',
+                  borderRadius: '8px',
+                  border: '1px solid #059669',
+                  background: showAllTShirts ? '#059669' : 'transparent',
+                  color: showAllTShirts ? '#fff' : '#059669',
+                  fontSize: '12px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {showAllTShirts ? '← Single View' : `📊 View All (${allDPPs.length})`}
+              </button>
+            </div>
             
-            {!currentDPP ? (
+            {showAllTShirts ? (
+              // ALL T-SHIRTS VIEW
+              <div>
+                {!currentAccount ? (
+                  <div style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                    <p>👛 Connect your wallet to view your t-shirts</p>
+                  </div>
+                ) : allDPPs.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                    <div style={{ fontSize: '48px', marginBottom: '16px' }}>👕</div>
+                    <p>No t-shirts in your collection yet</p>
+                    <p style={{ fontSize: '12px', marginTop: '8px' }}>
+                      Go to Manufacturer tab to create one!
+                    </p>
+                  </div>
+                ) : (
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+                    gap: '24px',
+                  }}>
+                    {allDPPs.map((dpp) => (
+                      <div
+                        key={dpp.id}
+                        onClick={() => {
+                          setCurrentDPP(dpp);
+                          setShowAllTShirts(false);
+                          console.log('📌 Selected DPP:', dpp.id);
+                        }}
+                        style={{
+                          background: '#0f172a',
+                          border: '2px solid #334155',
+                          borderRadius: '16px',
+                          padding: '24px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          position: 'relative',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = '#059669';
+                          e.currentTarget.style.transform = 'translateY(-4px)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = '#334155';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                      >
+                        {/* Status Badge */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '12px',
+                          right: '12px',
+                          fontSize: '10px',
+                          padding: '4px 8px',
+                          borderRadius: '6px',
+                          background: dpp.status === DPP_STATUS.ACTIVE ? '#22c55e20' :
+                                      dpp.status === DPP_STATUS.END_OF_LIFE ? '#f59e0b20' : '#8b5cf620',
+                          color: dpp.status === DPP_STATUS.ACTIVE ? '#22c55e' :
+                                 dpp.status === DPP_STATUS.END_OF_LIFE ? '#f59e0b' : '#8b5cf6',
+                          fontWeight: '600',
+                        }}>
+                          {dpp.status === DPP_STATUS.ACTIVE ? '✓' : 
+                           dpp.status === DPP_STATUS.END_OF_LIFE ? '⏳' : '♻️'}
+                        </div>
+
+                        {/* T-Shirt Visual */}
+                        <div style={{
+                          fontSize: '80px',
+                          textAlign: 'center',
+                          marginBottom: '16px',
+                          filter: dpp.status === DPP_STATUS.RECYCLED ? 'grayscale(50%) opacity(0.6)' : 'none',
+                        }}>
+                          👕
+                        </div>
+
+                        {/* DPP Info on T-Shirt */}
+                        <div style={{
+                          background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                          borderRadius: '8px',
+                          padding: '12px',
+                          marginBottom: '12px',
+                          fontSize: '11px',
+                          color: '#fff',
+                        }}>
+                          <div style={{ fontWeight: '600', marginBottom: '4px', fontSize: '12px' }}>
+                            {dpp.material}
+                          </div>
+                          <div style={{ opacity: 0.9, fontSize: '10px' }}>
+                            {dpp.id.slice(0, 8)}...{dpp.id.slice(-4)}
+                          </div>
+                        </div>
+
+                        {/* Reward Display */}
+                        <div style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                          padding: '8px 0',
+                        }}>
+                          <span style={{ fontSize: '11px', color: '#94a3b8' }}>
+                            Reward
+                          </span>
+                          <span style={{
+                            fontSize: '16px',
+                            fontWeight: '700',
+                            color: dpp.status === DPP_STATUS.RECYCLED ? '#64748b' : '#22c55e',
+                          }}>
+                            ${dpp.status === DPP_STATUS.RECYCLED 
+                              ? (dpp.originalReward || 0).toFixed(2) 
+                              : dpp.lockedReward.toFixed(2)}
+                          </span>
+                        </div>
+
+                        {dpp.status === DPP_STATUS.RECYCLED && (
+                          <div style={{
+                            marginTop: '8px',
+                            fontSize: '11px',
+                            color: '#8b5cf6',
+                            textAlign: 'center',
+                            fontWeight: '600',
+                          }}>
+                            ✅ Claimed
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              // SINGLE T-SHIRT VIEW (original)
+              <div>
+                {!currentDPP ? (
               <div style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
                 <div style={{ fontSize: '48px', marginBottom: '16px' }}>📷</div>
                 <p>Scan a DPP QR code to view t-shirt</p>
@@ -826,6 +845,8 @@ const TShirtDPP = () => {
                   </div>
                 )}
               </>
+            )}
+              </div>
             )}
           </div>
         )}
