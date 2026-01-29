@@ -220,6 +220,7 @@ const TShirtDPP = () => {
 
   // State for showing all t-shirts overview
   const [showAllTShirts, setShowAllTShirts] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'eol' | 'recycled'>('all');
   
   const tabs: Tab[] = [
     { id: 'manufacturer', label: '🏭 Manufacturer', color: '#2563eb' },
@@ -562,6 +563,41 @@ const TShirtDPP = () => {
             {showAllTShirts ? (
               // ALL T-SHIRTS VIEW
               <div>
+                {/* Filter Buttons */}
+                {currentAccount && allDPPs.length > 0 && (
+                  <div style={{ 
+                    display: 'flex', 
+                    gap: '6px', 
+                    marginBottom: '20px',
+                    flexWrap: 'wrap',
+                  }}>
+                    {[
+                      { id: 'all', label: 'All', count: allDPPs.length },
+                      { id: 'active', label: 'Active', count: allDPPs.filter(d => d.status === DPP_STATUS.ACTIVE).length },
+                      { id: 'eol', label: 'End of Life', count: allDPPs.filter(d => d.status === DPP_STATUS.END_OF_LIFE).length },
+                      { id: 'recycled', label: 'Recycled', count: allDPPs.filter(d => d.status === DPP_STATUS.RECYCLED).length },
+                    ].map((filter) => (
+                      <button
+                        key={filter.id}
+                        onClick={() => setStatusFilter(filter.id as any)}
+                        style={{
+                          padding: '4px 10px',
+                          borderRadius: '6px',
+                          border: `1px solid ${statusFilter === filter.id ? '#059669' : 'rgba(148, 163, 184, 0.3)'}`,
+                          background: statusFilter === filter.id ? 'rgba(5, 150, 105, 0.15)' : 'transparent',
+                          color: statusFilter === filter.id ? '#059669' : '#94a3b8',
+                          fontSize: '11px',
+                          cursor: 'pointer',
+                          fontWeight: statusFilter === filter.id ? '600' : '400',
+                          transition: 'all 0.15s ease',
+                        }}
+                      >
+                        {filter.label} <span style={{ opacity: 0.6 }}>({filter.count})</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+                
                 {!currentAccount ? (
                   <div style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
                     <p>👛 Connect your wallet to view your t-shirts</p>
@@ -574,13 +610,31 @@ const TShirtDPP = () => {
                       Go to Manufacturer tab to create one!
                     </p>
                   </div>
-                ) : (
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-                    gap: '24px',
-                  }}>
-                    {allDPPs.map((dpp) => (
+                ) : (() => {
+                  const filteredDPPs = allDPPs.filter(dpp => {
+                    if (statusFilter === 'all') return true;
+                    if (statusFilter === 'active') return dpp.status === DPP_STATUS.ACTIVE;
+                    if (statusFilter === 'eol') return dpp.status === DPP_STATUS.END_OF_LIFE;
+                    if (statusFilter === 'recycled') return dpp.status === DPP_STATUS.RECYCLED;
+                    return true;
+                  });
+                  
+                  if (filteredDPPs.length === 0) {
+                    return (
+                      <div style={{ textAlign: 'center', padding: '40px 0', color: '#64748b' }}>
+                        <div style={{ fontSize: '32px', marginBottom: '12px' }}>🔍</div>
+                        <p style={{ fontSize: '14px' }}>No t-shirts match this filter</p>
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
+                      gap: '24px',
+                    }}>
+                      {filteredDPPs.map((dpp) => (
                       <div
                         key={dpp.id}
                         onClick={() => {
@@ -721,9 +775,10 @@ const TShirtDPP = () => {
                           </div>
                         )}
                       </div>
-                    ))}
-                  </div>
-                )}
+                      ))}
+                    </div>
+                  );
+                })()}
               </div>
             ) : (
               // SINGLE T-SHIRT VIEW (original)
