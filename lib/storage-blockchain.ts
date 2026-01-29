@@ -67,7 +67,8 @@ export async function getDPPsByOwner(ownerAddress: string): Promise<TShirtDPP[]>
           originalReward: originalReward,
           consumer: fields.consumer || null,
           status: Number(fields.status),
-          createdAt: Date.now(),
+          createdAt: Number(fields.created_at) || Date.now(),
+          endOfLifeAt: fields.end_of_life_at ? Number(fields.end_of_life_at) : null,
           manufacturer: 'Blockchain',
         });
       }
@@ -193,6 +194,7 @@ export async function createDPP(
         tx.pure.string(material),
         tx.pure.u64(lockedReward),
         tx.pure.address(recipientAddress),
+        tx.object('0x6'), // Clock object
       ],
     });
     
@@ -275,6 +277,7 @@ export async function markEndOfLife(
       target: `${PACKAGE_ID}::tshirt_dpp::mark_end_of_life`,
       arguments: [
         tx.object(dppId),
+        tx.object('0x6'), // Clock object
       ],
     });
     

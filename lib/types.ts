@@ -20,7 +20,8 @@ export interface TShirtDPP {
   originalReward: number;        // Original reward amount (for display after unlock)
   consumer: string | null;       // Consumer wallet address
   status: DPPStatus;             // 0=Active, 1=EndOfLife, 2=Recycled
-  createdAt: number;             // Unix timestamp
+  createdAt: number;             // Unix timestamp when DPP was created
+  endOfLifeAt: number | null;    // Unix timestamp when marked end of life
   manufacturer: string;          // Manufacturer address
 }
 

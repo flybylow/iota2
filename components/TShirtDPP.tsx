@@ -772,6 +772,42 @@ const TShirtDPP = () => {
                           </div>
                         </div>
 
+                        {/* Age and Dates */}
+                        <div style={{
+                          fontSize: '10px',
+                          color: '#64748b',
+                          marginBottom: '12px',
+                          paddingBottom: '10px',
+                          borderBottom: '1px solid rgba(51, 65, 85, 0.5)',
+                        }}>
+                          {(() => {
+                            const now = Date.now();
+                            const ageMs = now - dpp.createdAt;
+                            const ageDays = Math.floor(ageMs / (1000 * 60 * 60 * 24));
+                            const ageMonths = Math.floor(ageDays / 30);
+                            const ageYears = Math.floor(ageDays / 365);
+                            
+                            let ageText = '';
+                            if (ageYears > 0) ageText = `${ageYears}y old`;
+                            else if (ageMonths > 0) ageText = `${ageMonths}mo old`;
+                            else if (ageDays > 0) ageText = `${ageDays}d old`;
+                            else ageText = 'New';
+                            
+                            return (
+                              <div>
+                                <div style={{ marginBottom: '3px' }}>
+                                  <span style={{ opacity: 0.7 }}>Age:</span> {ageText}
+                                </div>
+                                {dpp.endOfLifeAt && (
+                                  <div style={{ opacity: 0.7 }}>
+                                    EOL: {new Date(dpp.endOfLifeAt).toLocaleDateString()}
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })()}
+                        </div>
+
                         {/* Reward Display */}
                         <div style={{
                           display: 'flex',
