@@ -209,10 +209,13 @@ const TShirtDPP = () => {
     setConsumerWallet('');
   }
 
-  function useDemoWallet() {
-    const demoAddress = '0xC0NSUMER123456789abcdef0123456789abcdef';
-    console.log('🎲 Using demo wallet:', demoAddress);
-    setConsumerWallet(demoAddress);
+  function useMyWallet() {
+    if (!currentAccount) {
+      alert('Please connect your wallet first!');
+      return;
+    }
+    console.log('👛 Using your wallet:', currentAccount.address);
+    setConsumerWallet(currentAccount.address);
   }
 
   const tabs: Tab[] = [
@@ -631,7 +634,7 @@ const TShirtDPP = () => {
                           }}
                         />
                         <button
-                          onClick={useDemoWallet}
+                          onClick={useMyWallet}
                           style={{
                             position: 'absolute',
                             right: '8px',
@@ -647,7 +650,7 @@ const TShirtDPP = () => {
                             fontWeight: '500',
                           }}
                         >
-                          Use Demo
+                          Use My Wallet
                         </button>
                       </div>
                     </div>
