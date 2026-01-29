@@ -87,17 +87,22 @@ const TShirtDPP = () => {
       signAndExecute
     );
     
-    if (result.success) {
+    if (result.success && result.dppId) {
       console.log('Output:');
       console.log('  Transaction ID:', result.transactionId);
+      console.log('  DPP Object ID:', result.dppId);
       console.log('  Status: DPP Created Successfully ✅');
       console.log('  View on Explorer: https://explorer.iota.org/txblock/' + result.transactionId + '?network=testnet');
       console.log('═══════════════════════════════════════\n');
       
-      // Wait a bit for blockchain to index
-      setTimeout(() => {
+      // Fetch and display the newly created DPP
+      setTimeout(async () => {
+        const dpp = await storage.getDPPById(result.dppId!);
+        if (dpp) {
+          setCurrentDPP(dpp);
+        }
         loadDPPs();
-      }, 2000);
+      }, 1000);
     } else {
       console.error('Error:', result.error);
       alert('Failed to create DPP: ' + result.error);

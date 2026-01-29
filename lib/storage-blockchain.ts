@@ -134,7 +134,7 @@ export async function createDPP(
   lockedReward: number,
   recipientAddress: string,
   signAndExecute: any
-): Promise<TransactionResult> {
+): Promise<TransactionResult & { dppId?: string }> {
   try {
     const tx = new Transaction();
     
@@ -154,7 +154,21 @@ export async function createDPP(
         {
           onSuccess: (result: any) => {
             console.log('✅ DPP Created on blockchain:', result.digest);
-            resolve({ success: true, transactionId: result.digest });
+            
+            // Extract the DPP object ID from created objects
+            const createdObjects = result.effects?.created || [];
+            const dppObject = createdObjects.find((obj: any) => 
+              obj.owner && typeof obj.owner === 'object' && 'AddressOwner' in obj.owner
+            );
+            
+            const dppId = dppObject?.reference?.objectId;
+            console.log('📦 DPP Object ID:', dppId);
+            
+            resolve({ 
+              success: true, 
+              transactionId: result.digest,
+              dppId: dppId 
+            });
           },
           onError: (error: any) => {
             console.error('❌ Error creating DPP:', error);
