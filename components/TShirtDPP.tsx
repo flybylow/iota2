@@ -221,6 +221,30 @@ const TShirtDPP = () => {
   // State for showing all t-shirts overview
   const [showAllTShirts, setShowAllTShirts] = useState(false);
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'eol' | 'recycled'>('all');
+  const [viewingDetailDPP, setViewingDetailDPP] = useState<DPPType | null>(null);
+  
+  // T-shirt design names for personality
+  const getTShirtDesign = (dppId: string) => {
+    const designs = [
+      '🎸 Van Halen Tour 1984',
+      '🤘 Metallica Master of Puppets',
+      '🎵 Pink Floyd Dark Side',
+      '⚡ AC/DC Back in Black',
+      '🎤 Nirvana Nevermind',
+      '🎸 Led Zeppelin IV',
+      '🌈 Rolling Stones Tongue',
+      '🎪 The Beatles Abbey Road',
+      '🔥 Guns N\' Roses Appetite',
+      '🌟 Queen Bohemian Rhapsody',
+      '🎯 The Clash London Calling',
+      '💀 Ramones Logo',
+      '🎭 Joy Division Unknown',
+      '🌊 The Doors LA Woman',
+    ];
+    // Use DPP ID to consistently assign a design
+    const hash = dppId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    return designs[hash % designs.length];
+  };
   
   const tabs: Tab[] = [
     { id: 'manufacturer', label: '🏭 Manufacturer', color: '#2563eb' },
@@ -691,9 +715,8 @@ const TShirtDPP = () => {
                       <div
                         key={dpp.id}
                         onClick={() => {
-                          setCurrentDPP(dpp);
-                          setShowAllTShirts(false);
-                          console.log('📌 Selected DPP:', dpp.id);
+                          setViewingDetailDPP(dpp);
+                          console.log('👁️ Viewing detail page for:', dpp.id);
                         }}
                         style={{
                           background: 'rgba(15, 23, 42, 0.4)',
@@ -753,12 +776,24 @@ const TShirtDPP = () => {
                         {/* T-Shirt Visual - Minimal */}
                         <div style={{
                           textAlign: 'center',
-                          marginBottom: '16px',
+                          marginBottom: '8px',
                           fontSize: '64px',
                           opacity: dpp.status === DPP_STATUS.RECYCLED ? 0.5 : 0.9,
                           filter: dpp.status === DPP_STATUS.RECYCLED ? 'grayscale(70%)' : 'none',
                         }}>
                           👕
+                        </div>
+
+                        {/* T-Shirt Design Name */}
+                        <div style={{
+                          textAlign: 'center',
+                          marginBottom: '12px',
+                          fontSize: '13px',
+                          fontWeight: '600',
+                          color: '#f8fafc',
+                          lineHeight: '1.3',
+                        }}>
+                          {getTShirtDesign(dpp.id)}
                         </div>
 
                         {/* DPP Info with Material Indicator */}
@@ -1230,6 +1265,247 @@ const TShirtDPP = () => {
           </div>
         )}
       </div>
+
+      {/* Detail View Modal */}
+      {viewingDetailDPP && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.8)',
+          backdropFilter: 'blur(4px)',
+          zIndex: 1000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px',
+        }}
+        onClick={() => setViewingDetailDPP(null)}
+        >
+          <div style={{
+            background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+            borderRadius: '20px',
+            border: '1px solid #334155',
+            maxWidth: '600px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflow: 'auto',
+            padding: '32px',
+            position: 'relative',
+          }}
+          onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close Button */}
+            <button
+              onClick={() => setViewingDetailDPP(null)}
+              style={{
+                position: 'absolute',
+                top: '16px',
+                right: '16px',
+                background: 'rgba(51, 65, 85, 0.5)',
+                border: '1px solid rgba(148, 163, 184, 0.3)',
+                borderRadius: '8px',
+                padding: '8px 12px',
+                color: '#94a3b8',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontWeight: '500',
+              }}
+            >
+              ✕ Close
+            </button>
+
+            {/* T-Shirt Design Header */}
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <div style={{ fontSize: '80px', marginBottom: '12px' }}>👕</div>
+              <h2 style={{ 
+                fontSize: '24px', 
+                fontWeight: '700', 
+                color: '#f8fafc',
+                marginBottom: '8px',
+              }}>
+                {getTShirtDesign(viewingDetailDPP.id)}
+              </h2>
+              <div style={{
+                display: 'inline-block',
+                fontSize: '11px',
+                padding: '4px 12px',
+                borderRadius: '6px',
+                background: viewingDetailDPP.status === DPP_STATUS.ACTIVE ? 'rgba(34, 197, 94, 0.15)' :
+                            viewingDetailDPP.status === DPP_STATUS.END_OF_LIFE ? 'rgba(245, 158, 11, 0.15)' : 
+                            'rgba(139, 92, 246, 0.15)',
+                border: `1px solid ${
+                  viewingDetailDPP.status === DPP_STATUS.ACTIVE ? 'rgba(34, 197, 94, 0.3)' :
+                  viewingDetailDPP.status === DPP_STATUS.END_OF_LIFE ? 'rgba(245, 158, 11, 0.3)' :
+                  'rgba(139, 92, 246, 0.3)'
+                }`,
+                color: viewingDetailDPP.status === DPP_STATUS.ACTIVE ? '#22c55e' :
+                      viewingDetailDPP.status === DPP_STATUS.END_OF_LIFE ? '#f59e0b' : '#8b5cf6',
+                fontWeight: '600',
+              }}>
+                {getStatusLabel(viewingDetailDPP.status)}
+              </div>
+            </div>
+
+            {/* Material Info */}
+            <div style={{
+              background: 'rgba(15, 23, 42, 0.6)',
+              borderRadius: '12px',
+              padding: '20px',
+              marginBottom: '20px',
+            }}>
+              <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '12px', fontWeight: '600' }}>
+                MATERIAL COMPOSITION
+              </div>
+              <div style={{ 
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '16px',
+                color: '#f8fafc',
+                fontWeight: '500',
+              }}>
+                <span style={{ fontSize: '20px' }}>
+                  {viewingDetailDPP.material.includes('Organic') ? '🌱' :
+                   viewingDetailDPP.material.includes('Recycled') ? '♻️' :
+                   viewingDetailDPP.material.includes('100% Cotton') ? '🌿' :
+                   viewingDetailDPP.material.includes('Blend') ? '🔀' :
+                   viewingDetailDPP.material.includes('Polyester') ? '🧪' : '👕'}
+                </span>
+                {viewingDetailDPP.material}
+              </div>
+            </div>
+
+            {/* Lifecycle Timeline */}
+            <div style={{
+              background: 'rgba(15, 23, 42, 0.6)',
+              borderRadius: '12px',
+              padding: '20px',
+              marginBottom: '20px',
+            }}>
+              <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '12px', fontWeight: '600' }}>
+                LIFECYCLE TIMELINE
+              </div>
+              {(() => {
+                const now = Date.now();
+                const ageMs = now - viewingDetailDPP.createdAt;
+                const ageDays = Math.floor(ageMs / (1000 * 60 * 60 * 24));
+                const ageMonths = Math.floor(ageDays / 30);
+                const ageYears = Math.floor(ageDays / 365);
+                
+                let ageText = '';
+                if (ageYears > 0) ageText = `${ageYears} year${ageYears > 1 ? 's' : ''}`;
+                else if (ageMonths > 0) ageText = `${ageMonths} month${ageMonths > 1 ? 's' : ''}`;
+                else if (ageDays > 0) ageText = `${ageDays} day${ageDays > 1 ? 's' : ''}`;
+                else ageText = 'Brand new';
+                
+                return (
+                  <div style={{ fontSize: '14px', color: '#cbd5e1', lineHeight: '1.8' }}>
+                    <div>📅 Created: {new Date(viewingDetailDPP.createdAt).toLocaleDateString()}</div>
+                    <div>⏱️ Age: {ageText}</div>
+                    {viewingDetailDPP.endOfLifeAt && (
+                      <div>🏁 End of Life: {new Date(viewingDetailDPP.endOfLifeAt).toLocaleDateString()}</div>
+                    )}
+                    {viewingDetailDPP.status === DPP_STATUS.RECYCLED && (
+                      <div>♻️ Recycled & Reward Claimed</div>
+                    )}
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Reward Info */}
+            <div style={{
+              background: 'rgba(15, 23, 42, 0.6)',
+              borderRadius: '12px',
+              padding: '20px',
+              marginBottom: '20px',
+            }}>
+              <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '12px', fontWeight: '600' }}>
+                RECYCLING REWARD
+              </div>
+              <div style={{ 
+                fontSize: '32px', 
+                fontWeight: '700',
+                color: viewingDetailDPP.status === DPP_STATUS.RECYCLED ? '#64748b' : '#22c55e',
+              }}>
+                ${viewingDetailDPP.status === DPP_STATUS.RECYCLED 
+                  ? (viewingDetailDPP.originalReward || 0).toFixed(2) 
+                  : viewingDetailDPP.lockedReward.toFixed(2)}
+              </div>
+              <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '4px' }}>
+                {viewingDetailDPP.status === DPP_STATUS.RECYCLED 
+                  ? '✅ Claimed and released'
+                  : viewingDetailDPP.status === DPP_STATUS.END_OF_LIFE
+                  ? '⏳ Ready to claim at recycling point'
+                  : '🔒 Locked - bring to recycling to unlock'}
+              </div>
+            </div>
+
+            {/* DPP ID */}
+            <div style={{
+              background: 'rgba(15, 23, 42, 0.6)',
+              borderRadius: '12px',
+              padding: '20px',
+            }}>
+              <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '8px', fontWeight: '600' }}>
+                DIGITAL PRODUCT PASSPORT ID
+              </div>
+              <div style={{ 
+                fontSize: '11px',
+                color: '#64748b',
+                fontFamily: 'monospace',
+                wordBreak: 'break-all',
+                lineHeight: '1.6',
+              }}>
+                {viewingDetailDPP.id}
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div style={{ marginTop: '24px', display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => {
+                  setCurrentDPP(viewingDetailDPP);
+                  setViewingDetailDPP(null);
+                  setShowAllTShirts(false);
+                  setActiveTab('consumer');
+                }}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  borderRadius: '8px',
+                  border: '1px solid #334155',
+                  background: 'rgba(5, 150, 105, 0.1)',
+                  color: '#059669',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                }}
+              >
+                Manage T-Shirt
+              </button>
+              <button
+                onClick={() => setViewingDetailDPP(null)}
+                style={{
+                  padding: '12px 24px',
+                  borderRadius: '8px',
+                  border: '1px solid #334155',
+                  background: 'transparent',
+                  color: '#94a3b8',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <div style={{ 
