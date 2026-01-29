@@ -36,16 +36,35 @@ export async function getDPPsByOwner(ownerAddress: string): Promise<TShirtDPP[]>
       },
     });
     
+    // Query all DPPCreated events to get original reward amounts
+    const createdEvents = await client.queryEvents({
+      query: { MoveEventType: `${PACKAGE_ID}::tshirt_dpp::DPPCreated` },
+      limit: 50,
+    });
+    
+    // Create a map of DPP ID to original reward
+    const originalRewards = new Map<string, number>();
+    for (const event of createdEvents.data) {
+      const data = event.parsedJson as any;
+      originalRewards.set(data.dpp_id, Number(data.locked_reward));
+    }
+    
     const dpps: TShirtDPP[] = [];
     
     for (const obj of objects.data) {
       if (obj.data?.content && obj.data.content.dataType === 'moveObject') {
         const fields = obj.data.content.fields as any;
+        const dppId = fields.id.id;
+        const currentReward = Number(fields.locked_reward);
+        
+        // Use original reward from event, or fall back to current reward
+        const originalReward = originalRewards.get(dppId) || currentReward;
+        
         dpps.push({
-          id: fields.id.id,
+          id: dppId,
           material: fields.material,
-          lockedReward: Number(fields.locked_reward),
-          originalReward: Number(fields.locked_reward),
+          lockedReward: currentReward,
+          originalReward: originalReward,
           consumer: fields.consumer || null,
           status: Number(fields.status),
           createdAt: Date.now(),
