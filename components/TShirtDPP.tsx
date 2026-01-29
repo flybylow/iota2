@@ -106,17 +106,24 @@ const TShirtDPP = () => {
       console.log('  View on Explorer: https://explorer.iota.org/txblock/' + result.transactionId + '?network=testnet');
       console.log('═══════════════════════════════════════\n');
       
-      // Query all DPPs owned by user and show the most recent one
+      // Query all DPPs owned by user and show the newly created ACTIVE one
       setTimeout(async () => {
         console.log('🔍 Fetching your DPPs from blockchain...');
         const dpps = await storage.getDPPsByOwner(currentAccount.address);
         setAllDPPs(dpps);
         
         if (dpps.length > 0) {
-          // Show the most recently created DPP (last in the array)
-          const latestDPP = dpps[dpps.length - 1];
-          setCurrentDPP(latestDPP);
-          console.log('✅ Displaying latest DPP:', latestDPP.id);
+          // Find the first ACTIVE DPP (status = 0) - this will be the newly created one
+          const activeDPP = dpps.find(dpp => dpp.status === DPP_STATUS.ACTIVE);
+          
+          if (activeDPP) {
+            setCurrentDPP(activeDPP);
+            console.log('✅ Displaying newly created DPP:', activeDPP.id);
+          } else {
+            // Fallback: show the first DPP
+            setCurrentDPP(dpps[0]);
+            console.log('✅ No active DPP, showing first DPP:', dpps[0].id);
+          }
         } else {
           console.log('⚠️ No DPPs found for your wallet yet');
         }
