@@ -36,17 +36,20 @@ export async function getDPPsByOwner(ownerAddress: string): Promise<TShirtDPP[]>
       },
     });
     
-    // Query all DPPCreated events to get original reward amounts
+    // Query all DPPCreated events to get original reward amounts and manufacturer
     const createdEvents = await client.queryEvents({
       query: { MoveEventType: `${PACKAGE_ID}::tshirt_dpp::DPPCreated` },
       limit: 50,
     });
     
-    // Create a map of DPP ID to original reward
+    // Create maps for DPP ID to original reward and manufacturer
     const originalRewards = new Map<string, number>();
+    const manufacturers = new Map<string, string>();
     for (const event of createdEvents.data) {
       const data = event.parsedJson as any;
       originalRewards.set(data.dpp_id, Number(data.locked_reward));
+      // Get the sender of the transaction that created this DPP
+      manufacturers.set(data.dpp_id, event.sender);
     }
     
     const dpps: TShirtDPP[] = [];
@@ -60,6 +63,9 @@ export async function getDPPsByOwner(ownerAddress: string): Promise<TShirtDPP[]>
         // Use original reward from event, or fall back to current reward
         const originalReward = originalRewards.get(dppId) || currentReward;
         
+        // Get manufacturer address from event, or use placeholder
+        const manufacturerAddress = manufacturers.get(dppId) || 'Unknown';
+        
         // Note: created_at and end_of_life_at don't exist in deployed contract yet
         // Using fallback values for now
         dpps.push({
@@ -71,7 +77,7 @@ export async function getDPPsByOwner(ownerAddress: string): Promise<TShirtDPP[]>
           status: Number(fields.status),
           createdAt: Date.now() - (Math.random() * 365 * 24 * 60 * 60 * 1000), // Random age for demo
           endOfLifeAt: fields.status === 1 || fields.status === 2 ? Date.now() - (Math.random() * 30 * 24 * 60 * 60 * 1000) : null,
-          manufacturer: 'Blockchain',
+          manufacturer: manufacturerAddress,
         });
       }
     }

@@ -1079,7 +1079,11 @@ const TShirtDPP = () => {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #334155' }}>
                       <span>Manufacturer</span>
-                      <span style={{ color: '#f8fafc' }}>{currentDPP.manufacturer}</span>
+                      <span style={{ color: '#f8fafc', fontFamily: 'monospace', fontSize: '12px' }}>
+                        {currentDPP.manufacturer.startsWith('0x') 
+                          ? `${currentDPP.manufacturer.slice(0, 6)}...${currentDPP.manufacturer.slice(-4)}`
+                          : currentDPP.manufacturer}
+                      </span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
                       <span>Recycling Reward</span>
@@ -1300,7 +1304,11 @@ const TShirtDPP = () => {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                       <span>Manufacturer</span>
-                      <span style={{ color: '#f8fafc' }}>{currentDPP.manufacturer}</span>
+                      <span style={{ color: '#f8fafc', fontFamily: 'monospace', fontSize: '11px' }}>
+                        {currentDPP.manufacturer.startsWith('0x') 
+                          ? `${currentDPP.manufacturer.slice(0, 6)}...${currentDPP.manufacturer.slice(-4)}`
+                          : currentDPP.manufacturer}
+                      </span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                       <span>Consumer Wallet</span>
