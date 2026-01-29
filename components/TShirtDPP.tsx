@@ -1284,19 +1284,43 @@ const TShirtDPP = () => {
         }}
         onClick={() => setViewingDetailDPP(null)}
         >
-          <div style={{
-            background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-            borderRadius: '20px',
-            border: '1px solid #334155',
-            maxWidth: '600px',
-            width: '100%',
-            maxHeight: '90vh',
-            overflow: 'auto',
-            padding: '32px',
-            position: 'relative',
-          }}
-          onClick={(e) => e.stopPropagation()}
+          <div 
+            className="detail-modal-scroll"
+            style={{
+              background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
+              borderRadius: '20px',
+              border: '1px solid #334155',
+              maxWidth: '600px',
+              width: '100%',
+              maxHeight: '90vh',
+              overflow: 'auto',
+              padding: '32px',
+              position: 'relative',
+            }}
+            onClick={(e) => e.stopPropagation()}
           >
+            <style dangerouslySetInnerHTML={{__html: `
+              .detail-modal-scroll::-webkit-scrollbar {
+                width: 8px;
+              }
+              .detail-modal-scroll::-webkit-scrollbar-track {
+                background: rgba(15, 23, 42, 0.4);
+                border-radius: 10px;
+              }
+              .detail-modal-scroll::-webkit-scrollbar-thumb {
+                background: rgba(148, 163, 184, 0.3);
+                border-radius: 10px;
+                transition: background 0.2s ease;
+              }
+              .detail-modal-scroll::-webkit-scrollbar-thumb:hover {
+                background: rgba(148, 163, 184, 0.5);
+              }
+              /* Firefox */
+              .detail-modal-scroll {
+                scrollbar-width: thin;
+                scrollbar-color: rgba(148, 163, 184, 0.3) rgba(15, 23, 42, 0.4);
+              }
+            `}} />
             {/* Close Button */}
             <button
               onClick={() => setViewingDetailDPP(null)}
