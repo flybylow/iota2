@@ -538,10 +538,39 @@ const TShirtDPP = () => {
         {/* CONSUMER VIEW */}
         {activeTab === 'consumer' && (
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-              <h2 style={{ fontSize: '20px', color: '#059669', margin: 0 }}>
-                {showAllTShirts ? '👕 All My T-Shirts' : '👤 My T-Shirt'}
-              </h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <div>
+                <h2 style={{ fontSize: '20px', color: '#059669', margin: 0, marginBottom: '4px' }}>
+                  {showAllTShirts ? '👕 All My T-Shirts' : '👤 My T-Shirt'}
+                </h2>
+                {showAllTShirts && allDPPs.length > 0 && (() => {
+                  const totalClaimed = allDPPs
+                    .filter(dpp => dpp.status === DPP_STATUS.RECYCLED)
+                    .reduce((sum, dpp) => sum + (dpp.originalReward || 0), 0);
+                  
+                  if (totalClaimed > 0) {
+                    return (
+                      <div style={{
+                        fontSize: '11px',
+                        color: '#94a3b8',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                      }}>
+                        <span>Total claimed:</span>
+                        <span style={{
+                          color: '#22c55e',
+                          fontWeight: '600',
+                          fontSize: '12px',
+                        }}>
+                          ${totalClaimed.toFixed(2)}
+                        </span>
+                      </div>
+                    );
+                  }
+                  return null;
+                })()}
+              </div>
               <button
                 onClick={() => setShowAllTShirts(!showAllTShirts)}
                 style={{
@@ -569,6 +598,7 @@ const TShirtDPP = () => {
                     display: 'flex', 
                     gap: '6px', 
                     marginBottom: '20px',
+                    marginTop: '8px',
                     flexWrap: 'wrap',
                   }}>
                     {[
