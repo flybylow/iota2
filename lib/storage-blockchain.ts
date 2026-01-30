@@ -66,8 +66,7 @@ export async function getDPPsByOwner(ownerAddress: string): Promise<TShirtDPP[]>
         // Get manufacturer address from event, or use placeholder
         const manufacturerAddress = manufacturers.get(dppId) || 'Unknown';
         
-        // Note: created_at and end_of_life_at don't exist in deployed contract yet
-        // Using fallback values for now
+        // Read real timestamps from new deployment!
         dpps.push({
           id: dppId,
           material: fields.material,
@@ -75,8 +74,8 @@ export async function getDPPsByOwner(ownerAddress: string): Promise<TShirtDPP[]>
           originalReward: originalReward,
           consumer: fields.consumer || null,
           status: Number(fields.status),
-          createdAt: Date.now() - (Math.random() * 365 * 24 * 60 * 60 * 1000), // Random age for demo
-          endOfLifeAt: fields.status === 1 || fields.status === 2 ? Date.now() - (Math.random() * 30 * 24 * 60 * 60 * 1000) : null,
+          createdAt: Number(fields.created_at) || Date.now(),
+          endOfLifeAt: fields.end_of_life_at ? Number(fields.end_of_life_at) : null,
           manufacturer: manufacturerAddress,
         });
       }
@@ -202,7 +201,7 @@ export async function createDPP(
         tx.pure.string(material),
         tx.pure.u64(lockedReward),
         tx.pure.address(recipientAddress),
-        // Note: Clock parameter removed - deployed contract doesn't support it yet
+        tx.object('0x6'), // Clock object - NOW SUPPORTED!
       ],
     });
     
@@ -285,7 +284,7 @@ export async function markEndOfLife(
       target: `${PACKAGE_ID}::tshirt_dpp::mark_end_of_life`,
       arguments: [
         tx.object(dppId),
-        // Note: Clock parameter removed - deployed contract doesn't support it yet
+        tx.object('0x6'), // Clock object - NOW SUPPORTED!
       ],
     });
     
