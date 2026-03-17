@@ -1,0 +1,9 @@
+[package]
+name = "dpp_core"
+edition = "2024"
+
+[dependencies]
+# Dependencies on Iota, IotaSystem, MoveStdlib, and Stardust are automatically added
+
+[addresses]
+dpp_core = "0x0"

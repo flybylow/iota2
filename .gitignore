@@ -1,0 +1,16 @@
+.DS_Store
+.idea/
+.vscode/
+
+# Node / Next build artifacts (subprojects also have their own)
+node_modules/
+.next/
+out/
+build/
+dist/
+coverage/
+
+# Env files
+.env*
+!.env.local.example
+
