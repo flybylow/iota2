@@ -1,0 +1,2 @@
+- Currently there is no clear indication that the DPP+Index PTB creates a unique qr code to be placed on the shirt we might need to implement that functionality
+- Scan qr code claim ownership, and you can also transfer ownership by providing the address inside the box

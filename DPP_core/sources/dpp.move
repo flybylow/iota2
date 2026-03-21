@@ -263,4 +263,9 @@ module dpp_core::dpp {
     public fun end_of_life_at(dpp: &DPP): &Option<u64> {
         &dpp.end_of_life_at
     }
+
+    #[test_only]
+    public fun test_init(ctx: &mut TxContext) {
+        init(ctx);
+    }
 }
