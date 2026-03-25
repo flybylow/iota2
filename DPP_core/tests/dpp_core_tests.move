@@ -272,7 +272,7 @@ module dpp_core::dpp_core_tests {
             assert!(*option::borrow(dpp::consumer(&dpp)) == NEW_CONSUMER, 0);
             assert!(vector::length(dpp::owner_history(&dpp)) == 1, 0);
             let first = *vector::borrow(dpp::owner_history(&dpp), 0);
-            assert!(*dpp::ownership_record_from(&first) == option::none(), 0);
+            assert!(*dpp::ownership_record_from(&first) == option::some(CONSUMER), 0);
             assert!(dpp::ownership_record_to(&first) == NEW_CONSUMER, 0);
             ts::return_to_sender(&scenario, dpp);
         };
