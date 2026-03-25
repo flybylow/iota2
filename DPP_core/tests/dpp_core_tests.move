@@ -8,6 +8,7 @@ module dpp_core::dpp_core_tests {
     const MANUFACTURER: address = @0xAA;
     const CONSUMER: address     = @0xCC;
     const RECYCLER: address     = @0xBC;
+    const NEW_CONSUMER: address = @0xDD;
 
     // Helper: init and distribute caps to their respective roles
     fun setup_roles(scenario: &mut ts::Scenario) {
@@ -230,4 +231,62 @@ module dpp_core::dpp_core_tests {
         clock::destroy_for_testing(clock);
         ts::end(scenario);
     }
+
+    #[test]
+    fun test_transfer_ownership_keeps_locked_reward() {
+        let mut scenario = ts::begin(ADMIN);
+        let clock = clock::create_for_testing(ts::ctx(&mut scenario));
+
+        setup_roles(&mut scenario);
+
+        // MANUFACTURER creates DPP and sends to CONSUMER
+        ts::next_tx(&mut scenario, MANUFACTURER);
+        {
+            let cap = ts::take_from_sender<ManufacturerCap>(&scenario);
+            dpp::create_and_transfer_dpp(
+                &cap,
+                b"GTIN-006".to_string(),
+                b"Stone".to_string(),
+                800,
+                CONSUMER,
+                &clock,
+                ts::ctx(&mut scenario)
+            );
+            ts::return_to_sender(&scenario, cap);
+        };
+
+        // CONSUMER transfers ownership to NEW_CONSUMER
+        ts::next_tx(&mut scenario, CONSUMER);
+        {
+            let dpp = ts::take_from_sender<DPP>(&scenario);
+            dpp::transfer_ownership(dpp, NEW_CONSUMER, &clock, ts::ctx(&mut scenario));
+        };
+
+        // NEW_CONSUMER has DPP and can inspect status + reward
+        ts::next_tx(&mut scenario, NEW_CONSUMER);
+        {
+            let dpp = ts::take_from_sender<DPP>(&scenario);
+            assert!(dpp::status(&dpp) == 0, 0);
+            assert!(dpp::locked_reward(&dpp) == 800, 0);
+            assert!(option::is_some(dpp::consumer(&dpp)), 0);
+            assert!(*option::borrow(dpp::consumer(&dpp)) == NEW_CONSUMER, 0);
+            let first = *option::borrow(dpp::last_ownership_record(&dpp));
+            assert!(*dpp::ownership_record_from(&first) == option::some(CONSUMER), 0);
+            assert!(dpp::ownership_record_to(&first) == NEW_CONSUMER, 0);
+            ts::return_to_sender(&scenario, dpp);
+        };
+
+        // NEW_CONSUMER can mark end of life after transfer
+        ts::next_tx(&mut scenario, NEW_CONSUMER);
+        {
+            let mut dpp = ts::take_from_sender<DPP>(&scenario);
+            dpp::mark_end_of_life(&mut dpp, &clock, ts::ctx(&mut scenario));
+            assert!(dpp::status(&dpp) == 1, 0);
+            ts::return_to_sender(&scenario, dpp);
+        };
+
+        clock::destroy_for_testing(clock);
+        ts::end(scenario);
+    }
 }
+
