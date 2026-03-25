@@ -13,6 +13,7 @@ module dpp_core::dpp {
     // ============ Error Codes ============
 
     const ENotConsumer: u64 = 0;
+    const ENotOwner: u64 = 2;
     const EInvalidStatus: u64 = 1;
 
     // ============ Structs ============
@@ -43,6 +44,14 @@ module dpp_core::dpp {
         status: u8,
         created_at: u64,
         end_of_life_at: Option<u64>,
+        owner_history: vector<OwnershipRecord>,
+    }
+
+    /// Record of a DPP ownership transition
+    public struct OwnershipRecord has copy, drop, store {
+        from: Option<address>,
+        to: address,
+        timestamp_ms: u64,
     }
 
     // ============ Events ============
@@ -66,6 +75,14 @@ module dpp_core::dpp {
         dpp_id: ID,
         consumer: address,
         reward_amount: u64,
+    }
+
+    /// Emitted when ownership changes on a DPP (auction, resale, transfer)
+    public struct OwnershipTransferred has copy, drop {
+        dpp_id: ID,
+        from: Option<address>,
+        to: address,
+        timestamp_ms: u64,
     }
 
     // ============ Init ============
@@ -111,6 +128,7 @@ module dpp_core::dpp {
             status: STATUS_ACTIVE,
             created_at: clock::timestamp_ms(clock),
             end_of_life_at: option::none(),
+            owner_history: vector::empty<OwnershipRecord>(),
         };
 
         event::emit(DPPCreated {
@@ -143,6 +161,7 @@ module dpp_core::dpp {
             status: STATUS_ACTIVE,
             created_at: clock::timestamp_ms(clock),
             end_of_life_at: option::none(),
+            owner_history: vector::empty<OwnershipRecord>(),
         };
         let dpp_id: ID = object::id(&dpp);
 
@@ -208,6 +227,54 @@ module dpp_core::dpp {
         verify_and_unlock(cap, dpp);
     }
 
+    /// Transfer ownership of a DPP to a new consumer while preserving locked_reward
+    /// Requires current owner to call (if any owner exists)
+    public entry fun transfer_ownership(
+        mut dpp: DPP,
+        new_consumer: address,
+        clock: &Clock,
+        ctx: &mut TxContext
+    ) {
+        assert!(dpp.status == STATUS_ACTIVE, EInvalidStatus);
+
+        let caller = tx_context::sender(ctx);
+        if (option::is_some(&dpp.consumer)) {
+            let current_owner = *option::borrow(&dpp.consumer);
+            assert!(caller == current_owner, ENotOwner);
+        };
+
+        if (option::is_some(&dpp.consumer)) {
+            let current_owner = *option::borrow(&dpp.consumer);
+            dpp.consumer = option::some(new_consumer);
+            vector::push_back(&mut dpp.owner_history, OwnershipRecord {
+                from: option::some(current_owner),
+                to: new_consumer,
+                timestamp_ms: clock::timestamp_ms(clock),
+            });
+            event::emit(OwnershipTransferred {
+                dpp_id: object::id(&dpp),
+                from: option::some(current_owner),
+                to: new_consumer,
+                timestamp_ms: clock::timestamp_ms(clock),
+            });
+        } else {
+            dpp.consumer = option::some(new_consumer);
+            vector::push_back(&mut dpp.owner_history, OwnershipRecord {
+                from: option::none(),
+                to: new_consumer,
+                timestamp_ms: clock::timestamp_ms(clock),
+            });
+            event::emit(OwnershipTransferred {
+                dpp_id: object::id(&dpp),
+                from: option::none(),
+                to: new_consumer,
+                timestamp_ms: clock::timestamp_ms(clock),
+            });
+        };
+
+        transfer::transfer(dpp, new_consumer);
+    }
+
     // ============ Cap Transfer Functions ============
 
     /// Transfer AdminCap to a new owner
@@ -262,6 +329,22 @@ module dpp_core::dpp {
 
     public fun end_of_life_at(dpp: &DPP): &Option<u64> {
         &dpp.end_of_life_at
+    }
+
+    public fun owner_history(dpp: &DPP): &vector<OwnershipRecord> {
+        &dpp.owner_history
+    }
+
+    public fun ownership_record_from(rec: &OwnershipRecord): &Option<address> {
+        &rec.from
+    }
+
+    public fun ownership_record_to(rec: &OwnershipRecord): address {
+        rec.to
+    }
+
+    public fun ownership_record_timestamp(rec: &OwnershipRecord): u64 {
+        rec.timestamp_ms
     }
 
     #[test_only]
