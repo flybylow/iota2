@@ -260,13 +260,13 @@ module dpp_core::dpp {
         } else {
             dpp.consumer = option::some(new_consumer);
             vector::push_back(&mut dpp.owner_history, OwnershipRecord {
-                from: option::none(),
+                from: option::some(caller),
                 to: new_consumer,
                 timestamp_ms: clock::timestamp_ms(clock),
             });
             event::emit(OwnershipTransferred {
                 dpp_id: object::id(&dpp),
-                from: option::none(),
+                from: option::some(caller),
                 to: new_consumer,
                 timestamp_ms: clock::timestamp_ms(clock),
             });
