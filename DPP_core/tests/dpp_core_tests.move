@@ -233,7 +233,7 @@ module dpp_core::dpp_core_tests {
     }
 
     #[test]
-    fun test_transfer_ownership_keeps_locked_reward_and_records_event() {
+    fun test_transfer_ownership_keeps_locked_reward() {
         let mut scenario = ts::begin(ADMIN);
         let clock = clock::create_for_testing(ts::ctx(&mut scenario));
 
