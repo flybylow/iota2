@@ -130,7 +130,7 @@ module dpp_core::dpp {
             status: STATUS_ACTIVE,
             created_at: clock::timestamp_ms(clock),
             end_of_life_at: option::none(),
-            owner_history: vector::empty<OwnershipRecord>(),
+            last_ownership_record: option::none(),
         };
 
         event::emit(DPPCreated {
@@ -163,7 +163,7 @@ module dpp_core::dpp {
             status: STATUS_ACTIVE,
             created_at: clock::timestamp_ms(clock),
             end_of_life_at: option::none(),
-            owner_history: vector::empty<OwnershipRecord>(),
+            last_ownership_record: option::none(),
         };
         let dpp_id: ID = object::id(&dpp);
 
@@ -248,7 +248,7 @@ module dpp_core::dpp {
         if (option::is_some(&dpp.consumer)) {
             let current_owner = *option::borrow(&dpp.consumer);
             dpp.consumer = option::some(new_consumer);
-            vector::push_back(&mut dpp.owner_history, OwnershipRecord {
+            dpp.last_ownership_record = option::some(OwnershipRecord {
                 from: option::some(current_owner),
                 to: new_consumer,
                 timestamp_ms: clock::timestamp_ms(clock),
@@ -261,7 +261,7 @@ module dpp_core::dpp {
             });
         } else {
             dpp.consumer = option::some(new_consumer);
-            vector::push_back(&mut dpp.owner_history, OwnershipRecord {
+            dpp.last_ownership_record = option::some(OwnershipRecord {
                 from: option::some(caller),
                 to: new_consumer,
                 timestamp_ms: clock::timestamp_ms(clock),
@@ -333,8 +333,8 @@ module dpp_core::dpp {
         &dpp.end_of_life_at
     }
 
-    public fun owner_history(dpp: &DPP): &vector<OwnershipRecord> {
-        &dpp.owner_history
+    public fun last_ownership_record(dpp: &DPP): &Option<OwnershipRecord> {
+        &dpp.last_ownership_record
     }
 
     public fun ownership_record_from(rec: &OwnershipRecord): &Option<address> {

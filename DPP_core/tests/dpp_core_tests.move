@@ -270,8 +270,7 @@ module dpp_core::dpp_core_tests {
             assert!(dpp::locked_reward(&dpp) == 800, 0);
             assert!(option::is_some(dpp::consumer(&dpp)), 0);
             assert!(*option::borrow(dpp::consumer(&dpp)) == NEW_CONSUMER, 0);
-            assert!(vector::length(dpp::owner_history(&dpp)) == 1, 0);
-            let first = *vector::borrow(dpp::owner_history(&dpp), 0);
+            let first = *option::borrow(dpp::last_ownership_record(&dpp));
             assert!(*dpp::ownership_record_from(&first) == option::some(CONSUMER), 0);
             assert!(dpp::ownership_record_to(&first) == NEW_CONSUMER, 0);
             ts::return_to_sender(&scenario, dpp);
