@@ -44,7 +44,9 @@ module dpp_core::dpp {
         status: u8,
         created_at: u64,
         end_of_life_at: Option<u64>,
-        owner_history: vector<OwnershipRecord>,
+        /// Latest ownership transition for this DPP.
+        /// Full historical data should be obtained from emitted events.
+        last_ownership_record: Option<OwnershipRecord>,
     }
 
     /// Record of a DPP ownership transition
