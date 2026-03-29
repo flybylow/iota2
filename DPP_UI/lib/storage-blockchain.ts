@@ -21,6 +21,11 @@ const RECYCLER_CAP_ID = process.env.NEXT_PUBLIC_RECYCLER_CAP_ID ?? "";
 const REGISTRY_ID = process.env.NEXT_PUBLIC_REGISTRY_ID ?? "";
 const CLOCK_ID = "0x6"; // System clock object
 
+/** On-chain package in DPP_core/DEPLOYED.md predates country/metadata args on create_return_id. */
+const USE_LEGACY_DPP_CREATE =
+  process.env.NEXT_PUBLIC_DPP_LEGACY_CREATE === "1" ||
+  process.env.NEXT_PUBLIC_DPP_LEGACY_CREATE === "true";
+
 function requireEnv(name: string, value: string): string {
   if (!value || value.startsWith("0x...")) {
     throw new Error(
@@ -376,18 +381,31 @@ export async function createDPPWithPTB(
     const tx = new Transaction();
 
     // Step 1: Create DPP and get its ID
+    // Legacy ABI (older publish): cap, gtin, material, locked_reward, recipient, clock
+    // Current Move source adds country_of_manufacture + other_metadata before locked_reward.
+    const createArgs = USE_LEGACY_DPP_CREATE
+      ? [
+          tx.object(mfrCap),
+          tx.pure.string(gtin),
+          tx.pure.string(material),
+          tx.pure.u64(BigInt(lockedReward)),
+          tx.pure.address(recipientAddress),
+          tx.object(CLOCK_ID),
+        ]
+      : [
+          tx.object(mfrCap),
+          tx.pure.string(gtin),
+          tx.pure.string(material),
+          tx.pure.string(countryOfManufacture),
+          tx.pure.string(otherMetadata),
+          tx.pure.u64(BigInt(lockedReward)),
+          tx.pure.address(recipientAddress),
+          tx.object(CLOCK_ID),
+        ];
+
     const [dppId] = tx.moveCall({
       target: `${pkg}::dpp::create_return_id`,
-      arguments: [
-        tx.object(mfrCap),
-        tx.pure.string(gtin),
-        tx.pure.string(material),
-        tx.pure.string(countryOfManufacture), // ← add
-        tx.pure.string(otherMetadata),
-        tx.pure.u64(BigInt(lockedReward)),
-        tx.pure.address(recipientAddress),
-        tx.object(CLOCK_ID),
-      ],
+      arguments: createArgs,
     });
 
     // Step 2: Index the DPP in the registry (atomic - both succeed or both fail)
