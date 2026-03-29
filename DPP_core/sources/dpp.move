@@ -39,6 +39,8 @@ module dpp_core::dpp {
         id: UID,
         gtin: String,               // Global Trade Item Number (product identifier)
         material: String,
+        country_of_manufacture: String,
+        other_metadata: String,
         locked_reward: u64,
         consumer: Option<address>,
         status: u8,
@@ -63,6 +65,8 @@ module dpp_core::dpp {
         dpp_id: ID,
         gtin: String,
         material: String,
+        country_of_manufacture: String,
+        other_metadata: String,
         locked_reward: u64,
     }
 
@@ -116,6 +120,8 @@ module dpp_core::dpp {
         _cap: &ManufacturerCap,
         gtin: String,
         material: String,
+        country_of_manufacture: String,
+        other_metadata: String,
         locked_reward: u64,
         recipient: address,
         clock: &Clock,
@@ -125,6 +131,8 @@ module dpp_core::dpp {
             id: object::new(ctx),
             gtin,
             material,
+            country_of_manufacture,
+            other_metadata,
             locked_reward,
             consumer: option::none(),
             status: STATUS_ACTIVE,
@@ -137,6 +145,8 @@ module dpp_core::dpp {
             dpp_id: object::id(&dpp),
             gtin: dpp.gtin,
             material: dpp.material,
+            country_of_manufacture,
+            other_metadata,
             locked_reward,
         });
 
@@ -145,10 +155,12 @@ module dpp_core::dpp {
 
     /// Create a DPP and RETURN its ID
     /// This allows PTB to capture the ID and pass to registry::index_dpp
-    public entry fun create_return_id(
+    public fun create_return_id(
         _cap: &ManufacturerCap,
         gtin: String,
         material: String,
+        country_of_manufacture: String,
+        other_metadata: String,
         locked_reward: u64,
         recipient: address,
         clock: &Clock,
@@ -158,6 +170,8 @@ module dpp_core::dpp {
             id: object::new(ctx),
             gtin,
             material,
+            country_of_manufacture,
+            other_metadata,
             locked_reward,
             consumer: option::none(),
             status: STATUS_ACTIVE,
@@ -171,6 +185,8 @@ module dpp_core::dpp {
             dpp_id,
             gtin: dpp.gtin,
             material: dpp.material,
+            country_of_manufacture:dpp.country_of_manufacture,
+            other_metadata: dpp.other_metadata,
             locked_reward,
         });
 
@@ -311,6 +327,14 @@ module dpp_core::dpp {
 
     public fun material(dpp: &DPP): &String {
         &dpp.material
+    }
+
+    public fun country_of_manufacture(dpp: &DPP): &String {
+    &dpp.country_of_manufacture
+    }
+
+    public fun other_metadata(dpp: &DPP): &String {
+    &dpp.other_metadata
     }
 
     public fun locked_reward(dpp: &DPP): u64 {
