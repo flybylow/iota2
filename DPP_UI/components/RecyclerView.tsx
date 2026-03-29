@@ -39,7 +39,7 @@ export default function RecyclerView({
         </div>
       ) : currentDPP.status === DPP_STATUS.RECYCLED ? (
         <div className={styles.centeredView}>
-          <div style={{ fontSize: "64px", marginBottom: "16px" }}>Done</div>
+          <div className={styles.viewEmojiLarge}>Done</div>
           <h3 style={{ color: "#d97706", marginBottom: "16px" }}>Recycling Verified</h3>
           <div
             className={styles.verifiedCard}

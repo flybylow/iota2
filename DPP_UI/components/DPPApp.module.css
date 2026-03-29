@@ -7,40 +7,175 @@
 /* Layout */
 .container {
   min-height: 100vh;
+  min-height: 100dvh;
+  box-sizing: border-box;
+  max-width: 100%;
+  overflow-x: clip;
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
   font-family: "Inter", -apple-system, sans-serif;
   color: #f8fafc;
-  padding: 24px;
+  padding-top: max(16px, env(safe-area-inset-top));
+  padding-right: max(20px, env(safe-area-inset-right));
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+  padding-left: max(20px, env(safe-area-inset-left));
 }
 
 .header {
-  margin-bottom: 32px;
+  margin-bottom: 20px;
 }
 
 .headerTop {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  gap: 12px;
+}
+
+.headerTitles {
+  min-width: 0;
 }
 
 /* Typography */
 .title {
-  font-size: 28px;
+  font-size: 22px;
   font-weight: 700;
-  margin-bottom: 8px;
-  letter-spacing: -0.5px;
+  margin: 0 0 4px;
+  letter-spacing: -0.4px;
+  line-height: 1.2;
 }
 
 .subtitle {
   color: #94a3b8;
-  font-size: 14px;
+  font-size: 12px;
+  margin: 0;
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.network {
-  color: #64748b;
-  font-size: 12px;
-  margin-top: 4px;
+@media (max-width: 640px) {
+  .subtitle {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+  }
+
+  .headerTop {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .title {
+    font-size: 19px;
+  }
+
+  .walletSection {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  .walletRow {
+    justify-content: flex-end;
+  }
+
+  .connectedAddress {
+    text-align: right;
+  }
+
+  .card {
+    width: 100%;
+    max-width: 100%;
+    padding: 20px 16px;
+    border-radius: 16px;
+  }
+
+  .sectionTitle {
+    font-size: 17px;
+    margin-bottom: 16px;
+  }
+
+  .tabs {
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .tabBtn {
+    padding: 10px 14px;
+    font-size: 13px;
+    border-radius: 10px;
+  }
+
+  /* iOS: avoid auto-zoom on focus (16px minimum) */
+  .input,
+  .inputMono,
+  .select,
+  .lookupInput,
+  .wardrobeLookupInput,
+  .addressInput {
+    font-size: 16px;
+  }
+
+  .generateBtn {
+    font-size: 13px;
+  }
+
+  .wardrobeHero {
+    min-height: min(72vw, 360px);
+  }
+
+  .wardrobeHeroInner {
+    padding: 16px;
+  }
+
+  .wardrobeHeroTitle {
+    font-size: 18px;
+  }
+
+  .metadataRow {
+    flex-wrap: wrap;
+  }
+
+  .metadataValue {
+    max-width: 100%;
+    text-align: left;
+  }
+
+  .recycledReward {
+    font-size: 26px;
+  }
+
+  .materialText {
+    font-size: 20px;
+  }
+
+  .explorerLink {
+    word-break: break-word;
+  }
+}
+
+@media (max-width: 420px) {
+  .gtinRow {
+    flex-direction: column;
+  }
+
+  .generateBtn {
+    width: 100%;
+  }
+
+  .detailRow,
+  .detailRowLast {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .detailRow span:last-child,
+  .detailRowLast span:last-child {
+    width: 100%;
+    text-align: left;
+  }
 }
 
 .sectionTitle {
@@ -53,31 +188,40 @@
   display: flex;
   flex-direction: column;
   align-items: flex-end;
-  gap: 8px;
+  gap: 4px;
+  flex-shrink: 0;
   width: fit-content;
 }
 
 .walletRow {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
+}
+
+.compactWalletTriggers :global(button) {
+  padding: 5px 12px !important;
+  font-size: 12px !important;
+  min-height: 0 !important;
+  border-radius: 8px !important;
 }
 
 .registryBtn {
-  padding: 10px 20px;
-  border-radius: 12px;
+  padding: 5px 12px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 12px;
   transition: all 0.2s ease;
 }
 
 .connectedAddress {
   width: 100%;
   text-align: center;
-  font-size: 12px;
+  font-size: 11px;
   color: #f8fafc;
   font-family: monospace;
+  word-break: break-all;
 }
 
 /* Tabs */
@@ -100,6 +244,8 @@
 
 /* Card */
 .card {
+  box-sizing: border-box;
+  width: 100%;
   max-width: 500px;
   margin: 0 auto;
   background: #1e293b;
@@ -117,8 +263,9 @@
 
 .ptbLabel {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 10px 12px;
   cursor: pointer;
 }
 
@@ -152,10 +299,12 @@
 .gtinRow {
   display: flex;
   gap: 8px;
+  min-width: 0;
 }
 
 .inputMono {
   flex: 1;
+  min-width: 0;
   padding: 14px;
   border-radius: 12px;
   border: 1px solid #334155;
@@ -177,16 +326,19 @@
 
 .select {
   width: 100%;
+  max-width: 100%;
   padding: 14px;
   border-radius: 12px;
   border: 1px solid #334155;
   background: #0f172a;
   color: #f8fafc;
   font-size: 16px;
+  box-sizing: border-box;
 }
 
 .input {
   width: 100%;
+  max-width: 100%;
   padding: 14px;
   border-radius: 12px;
   border: 1px solid #334155;
@@ -310,13 +462,20 @@
 .dppItemRow {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.dppItemRow > div:first-child {
+  min-width: 0;
+  flex: 1;
 }
 
 .dppGtin {
   font-size: 12px;
   color: #f8fafc;
   font-family: monospace;
+  word-break: break-all;
 }
 
 .dppMaterial {
@@ -328,6 +487,7 @@
   font-size: 11px;
   padding: 4px 8px;
   border-radius: 4px;
+  flex-shrink: 0;
 }
 
 /* Empty states */
@@ -350,6 +510,14 @@
 /* Consumer / Recycler views */
 .centeredView {
   text-align: center;
+}
+
+/* Responsive emoji / headline in success states */
+.viewEmojiLarge {
+  font-size: clamp(2.25rem, 12vw, 4rem);
+  line-height: 1.1;
+  margin-bottom: 12px;
+  word-break: break-word;
 }
 
 .recycledReward {
@@ -382,6 +550,8 @@
 .detailRow {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px 12px;
   padding: 8px 0;
   border-bottom: 1px solid #334155;
 }
@@ -389,7 +559,15 @@
 .detailRowLast {
   display: flex;
   justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px 12px;
   padding: 8px 0;
+}
+
+.detailRow span:last-child,
+.detailRowLast span:last-child {
+  min-width: 0;
+  text-align: right;
 }
 
 .detailText {
@@ -400,6 +578,7 @@
 .monoValue {
   color: #f8fafc;
   font-family: monospace;
+  word-break: break-all;
 }
 
 .lightValue {
@@ -599,6 +778,7 @@
   text-align: right;
   font-size: 13px;
   max-width: 60%;
+  word-break: break-word;
 }
 
 /* Footer */
@@ -631,6 +811,7 @@
 
 .qrImageBtn {
   display: inline-block;
+  max-width: 100%;
   padding: 12px;
   background: #fff;
   border-radius: 12px;
@@ -638,11 +819,20 @@
   border: 2px solid #059669;
   cursor: pointer;
   line-height: 0;
+  box-sizing: border-box;
+}
+
+.qrImageBtn img {
+  display: block;
+  max-width: 100%;
+  height: auto;
 }
 
 .qrPlaceholder {
-  width: 220px;
-  height: 220px;
+  width: min(220px, 100%);
+  max-width: 100%;
+  aspect-ratio: 1;
+  margin: 0 auto;
   display: flex;
   align-items: center;
   justify-content: center;

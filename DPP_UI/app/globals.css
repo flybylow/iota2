@@ -5,10 +5,16 @@
   --foreground: #f8fafc;
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, sans-serif;
+  overflow-x: clip;
+  margin: 0;
 }
 
 @keyframes spin {

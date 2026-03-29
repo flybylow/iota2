@@ -249,27 +249,28 @@ const DPPApp = () => {
     <div className={styles.container}>
       <div className={styles.header}>
         <div className={styles.headerTop}>
-          <div>
+          <div className={styles.headerTitles}>
             <h1 className={styles.title}>Digital Product Passport</h1>
-            <p className={styles.subtitle}>Tabulas · MasterZ × IOTA Hackathon</p>
-            <p className={styles.network}>IOTA Testnet</p>
+            <p className={styles.subtitle}>
+              Tabulas · MasterZ × IOTA Hackathon - IOTA Testnet
+            </p>
           </div>
           <div className={styles.walletSection}>
-            <div className={styles.walletRow}>
+            <div className={`${styles.walletRow} ${styles.compactWalletTriggers}`}>
               <button
                 type="button"
                 onClick={() => setActiveTab("registry")}
                 className={styles.registryBtn}
                 style={{
                   border:
-                    activeTab === "registry" ? "2px solid #8b5cf6" : "2px solid #334155",
+                    activeTab === "registry" ? "1px solid #8b5cf6" : "1px solid #334155",
                   background: activeTab === "registry" ? "#8b5cf620" : "transparent",
                   color: activeTab === "registry" ? "#8b5cf6" : "#94a3b8",
                 }}
               >
                 Wardrobe
               </button>
-              <ConnectButton />
+              <ConnectButton size="md" />
             </div>
             {currentAccount && (
               <div className={styles.connectedAddress}>

@@ -48,7 +48,7 @@ export default function ConsumerView({
         </div>
       ) : currentDPP.status === DPP_STATUS.RECYCLED ? (
         <div className={styles.centeredView}>
-          <div style={{ fontSize: "64px", marginBottom: "16px" }}>Reward Claimed!</div>
+          <div className={styles.viewEmojiLarge}>Reward Claimed!</div>
           <h3 style={{ color: "#22c55e", marginBottom: "8px" }}>Reward Claimed!</h3>
           <p className={styles.recycledReward}>${currentDPP.originalReward.toFixed(2)}</p>
           <p className={styles.recycledSentTo}>Sent to consumer wallet</p>
