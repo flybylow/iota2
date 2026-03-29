@@ -1,5 +1,0 @@
-{
-  "$schema": "https://openapi.vercel.sh/vercel.json",
-  "installCommand": "cd DPP_UI && npm ci",
-  "buildCommand": "cd DPP_UI && npm run build && cd .. && rm -rf .next && cp -a DPP_UI/.next .next"
-}

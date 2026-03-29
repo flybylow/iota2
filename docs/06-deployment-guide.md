@@ -187,9 +187,9 @@ git push -u origin main
 3. Connect GitHub repository
 4. Configure project:
    - Framework Preset: Next.js
-   - Root Directory: `./`
-   - Build Command: `npm run build`
-   - Output Directory: `.next`
+   - **Root Directory** (IOTA2 monorepo): set to `tshirt-escrow` or `DPP_UI`, not the repo root. Building in a subfolder and copying only `.next` to the root breaks Next.js 16 file tracing (`ENOENT` for `client-only` under `node_modules`).
+   - Build Command: `npm run build` (default when Root Directory is the app folder)
+   - Output Directory: leave default (`.next` next to that app’s `package.json`)
 5. Add environment variables:
    - `NEXT_PUBLIC_IOTA_NETWORK`
    - `NEXT_PUBLIC_PACKAGE_ID`

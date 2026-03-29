@@ -1,8 +1,8 @@
 {
   "name": "iota2",
   "private": true,
-  "description": "Monorepo root — Next.js app lives in DPP_UI (Vercel build cwd).",
+  "description": "Monorepo root. On Vercel, set Root Directory to DPP_UI or tshirt-escrow (do not copy .next to repo root).",
   "scripts": {
-    "vercel-build": "cd DPP_UI && npm ci && npm run build && cd .. && rm -rf .next && cp -a DPP_UI/.next .next"
+    "vercel-build": "cd DPP_UI && npm ci && npm run build"
   }
 }
