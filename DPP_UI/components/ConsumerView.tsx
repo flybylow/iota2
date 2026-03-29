@@ -156,20 +156,46 @@ export default function ConsumerView({
                 <button
                   type="button"
                   onClick={onTransferOwnership}
-                  disabled={transferring}
+                  disabled={
+                    transferring ||
+                    !walletAddress ||
+                    !currentDPP ||
+                    currentDPP.consumer !== walletAddress
+                  }
                   className={styles.primaryBtn}
                   style={{
-                    background: transferring
-                      ? "#64748b"
-                      : "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)",
-                    cursor: transferring ? "not-allowed" : "pointer",
-                    opacity: transferring ? 0.7 : 1,
+                    background:
+                      transferring ||
+                      !walletAddress ||
+                      !currentDPP ||
+                      currentDPP.consumer !== walletAddress
+                        ? "#64748b"
+                        : "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)",
+                    cursor:
+                      transferring ||
+                      !walletAddress ||
+                      !currentDPP ||
+                      currentDPP.consumer !== walletAddress
+                        ? "not-allowed"
+                        : "pointer",
+                    opacity:
+                      transferring ||
+                      !walletAddress ||
+                      !currentDPP ||
+                      currentDPP.consumer !== walletAddress
+                        ? 0.7
+                        : 1,
                     marginTop: "8px",
                   }}
                 >
                   {transferring && <span className={styles.spinner} />}
                   {transferring ? "Transferring..." : "Transfer Ownership"}
                 </button>
+                {(!walletAddress || !currentDPP || currentDPP.consumer !== walletAddress) && (
+                  <p className={styles.addressHint}>
+                    Transfer is only available when your connected wallet is the current owner.
+                  </p>
+                )}
               </div>
 
               <button
