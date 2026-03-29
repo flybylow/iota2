@@ -249,7 +249,12 @@ const DPPApp = () => {
       setTimeout(async () => {
         await loadDPPs();
         const updated = await storage.getDPPById(currentDPP.id);
-        setCurrentDPP(updated);
+        if (updated && currentAccount && (updated as DPPType).owner === currentAccount.address) {
+          setCurrentDPP(updated);
+        } else {
+          // Clear selection if the connected wallet is no longer the owner
+          setCurrentDPP(null);
+        }
       }, 2000);
     } else {
       alert("Failed to transfer ownership: " + result.error);
