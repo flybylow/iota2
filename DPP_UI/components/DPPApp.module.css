@@ -1,0 +1,821 @@
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Layout */
+.container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  font-family: "Inter", -apple-system, sans-serif;
+  color: #f8fafc;
+  padding: 24px;
+}
+
+.header {
+  margin-bottom: 32px;
+}
+
+.headerTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+/* Typography */
+.title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+
+.subtitle {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.network {
+  color: #64748b;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.sectionTitle {
+  font-size: 20px;
+  margin-bottom: 24px;
+}
+
+/* Wallet section */
+.walletSection {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  width: fit-content;
+}
+
+.walletRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.registryBtn {
+  padding: 10px 20px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+.connectedAddress {
+  width: 100%;
+  text-align: center;
+  font-size: 12px;
+  color: #f8fafc;
+  font-family: monospace;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.tabBtn {
+  padding: 12px 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.2s ease;
+}
+
+/* Card */
+.card {
+  max-width: 500px;
+  margin: 0 auto;
+  background: #1e293b;
+  border-radius: 20px;
+  padding: 32px;
+  border: 1px solid #334155;
+}
+
+/* PTB Toggle */
+.ptbToggle {
+  margin-bottom: 20px;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.ptbLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.ptbCheckbox {
+  width: 18px;
+  height: 18px;
+}
+
+.ptbTitle {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.ptbHint {
+  font-size: 11px;
+  color: #64748b;
+}
+
+/* Form */
+.formGroup {
+  margin-bottom: 20px;
+}
+
+.formLabel {
+  display: block;
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.gtinRow {
+  display: flex;
+  gap: 8px;
+}
+
+.inputMono {
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 14px;
+  font-family: monospace;
+}
+
+.generateBtn {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  background: #1e293b;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.select {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 16px;
+}
+
+.input {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+/* Buttons */
+.primaryBtn {
+  width: 100%;
+  padding: 16px;
+  border-radius: 12px;
+  border: none;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.15s ease;
+}
+
+.secondaryBtn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.resetBtn {
+  width: 100%;
+  margin-top: 16px;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.useWalletBtn {
+  margin-top: 8px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: transparent;
+  color: #059669;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+/* Spinner */
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+/* Registry */
+.infoBox {
+  background: #8b5cf620;
+  border: 1px solid #8b5cf640;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 24px;
+}
+
+.infoBoxLabel {
+  font-size: 12px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.infoBoxText {
+  font-size: 14px;
+  color: #f8fafc;
+}
+
+.lookupInput {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #f8fafc;
+  font-size: 14px;
+  font-family: monospace;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+/* DPP List */
+.dppsList {
+  margin-top: 32px;
+}
+
+.dppsCountLabel {
+  font-size: 14px;
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+
+.dppItem {
+  padding: 12px;
+  background: #0f172a;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  border: 1px solid #334155;
+}
+
+.dppItemRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dppGtin {
+  font-size: 12px;
+  color: #f8fafc;
+  font-family: monospace;
+}
+
+.dppMaterial {
+  font-size: 11px;
+  color: #64748b;
+}
+
+.statusBadge {
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* Empty states */
+.emptyState {
+  text-align: center;
+  padding: 40px 0;
+  color: #64748b;
+}
+
+.emoji {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.emptyHint {
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+/* Consumer / Recycler views */
+.centeredView {
+  text-align: center;
+}
+
+.recycledReward {
+  font-size: 32px;
+  font-weight: 700;
+  color: #22c55e;
+  margin-bottom: 16px;
+}
+
+.recycledSentTo {
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+.explorerLink {
+  display: inline-block;
+  font-size: 13px;
+  color: #64748b;
+  text-decoration: none;
+}
+
+/* Details card */
+.detailsCard {
+  background: #0f172a;
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #334155;
+}
+
+.detailRowLast {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+}
+
+.detailText {
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.monoValue {
+  color: #f8fafc;
+  font-family: monospace;
+}
+
+.lightValue {
+  color: #f8fafc;
+}
+
+.rewardValue {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+/* Reward banner */
+.rewardBanner {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.bannerTitle {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.bannerHint {
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+/* Consumer address */
+.addressLabel {
+  display: block;
+  font-size: 14px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+.addressHint {
+  font-size: 12px;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.addressInput {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #f8fafc;
+  font-family: monospace;
+  font-size: 13px;
+}
+
+/* End of life */
+.eolWaiting {
+  background: #d9770620;
+  border: 1px solid #d97706;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.eolTitle {
+  color: #d97706;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.eolHint {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+/* Recycler verified */
+.verifiedCard {
+  background: #0f172a;
+  border-radius: 12px;
+  padding: 16px;
+  font-size: 14px;
+}
+
+.releasedTo {
+  color: #94a3b8;
+  margin-bottom: 8px;
+}
+
+/* Recycler details */
+.manufacturerLabel {
+  font-size: 12px;
+  color: #d97706;
+  margin-bottom: 12px;
+}
+
+.materialText {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.recyclerDetails {
+  border-top: 1px solid #334155;
+  padding-top: 16px;
+  font-size: 14px;
+  color: #94a3b8;
+}
+
+.recyclerDetailRow {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.recyclerDetailRowLast {
+  display: flex;
+  justify-content: space-between;
+}
+
+.dppIdValue {
+  font-family: monospace;
+  color: #f8fafc;
+  font-size: 11px;
+}
+
+/* Expandable metadata section */
+.expandableSection {
+  margin-bottom: 20px;
+  border: 1px solid #334155;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.expandableHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  background: #0f172a;
+  cursor: pointer;
+  user-select: none;
+}
+
+.expandableHeaderText {
+  font-size: 13px;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.expandableChevron {
+  font-size: 10px;
+  color: #64748b;
+  transition: transform 0.2s ease;
+}
+
+.expandableChevronOpen {
+  transform: rotate(180deg);
+}
+
+.expandableBody {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-top: 1px solid #334155;
+}
+
+/* Metadata display in consumer/recycler view */
+.metadataSection {
+  background: #0f172a;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.metadataSectionTitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.metadataRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 6px 0;
+  font-size: 13px;
+  color: #94a3b8;
+  gap: 12px;
+}
+
+.metadataValue {
+  color: #f8fafc;
+  text-align: right;
+  font-size: 13px;
+  max-width: 60%;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  margin-top: 32px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.footerLine {
+  margin-top: 4px;
+}
+
+/* Post-create QR (manufacturer) */
+.qrSuccessCard {
+  padding: 20px;
+  background: #0f172a;
+  border-radius: 16px;
+  border: 1px solid #334155;
+  text-align: center;
+}
+
+.qrSuccessTitle {
+  font-size: 14px;
+  font-weight: 600;
+  color: #22c55e;
+  margin-bottom: 16px;
+}
+
+.qrImageBtn {
+  display: inline-block;
+  padding: 12px;
+  background: #fff;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border: 2px solid #059669;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.qrPlaceholder {
+  width: 220px;
+  height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.qrHint {
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 12px;
+}
+
+.qrUrl {
+  font-size: 11px;
+  color: #64748b;
+  font-family: monospace;
+  word-break: break-all;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.qrActions {
+  display: flex;
+  justify-content: center;
+}
+
+.createAnotherBtn {
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid #334155;
+  background: transparent;
+  color: #94a3b8;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* Wardrobe hero (registry) */
+.wardrobeHero {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 24px;
+  border: 1px solid #334155;
+  min-height: 380px;
+}
+
+.wardrobeHeroBg {
+  position: absolute;
+  inset: 0;
+  background-image: url("/wardrobe.png");
+  background-size: cover;
+  background-position: center;
+}
+
+.wardrobeHeroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(15, 23, 42, 0.88) 0%,
+    rgba(15, 23, 42, 0.82) 45%,
+    rgba(15, 23, 42, 0.92) 100%
+  );
+}
+
+.wardrobeHeroInner {
+  position: relative;
+  z-index: 1;
+  padding: 24px;
+}
+
+.wardrobeHeroTitle {
+  font-size: 22px;
+  margin-bottom: 8px;
+  color: #e9d5ff;
+  font-weight: 700;
+}
+
+.wardrobeHeroSubtitle {
+  font-size: 13px;
+  color: #c4b5fd;
+  margin-bottom: 20px;
+  opacity: 0.95;
+}
+
+.wardrobeInfoCard {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(139, 92, 246, 0.35);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.wardrobeInfoLabel {
+  font-size: 12px;
+  color: #c4b5fd;
+  margin-bottom: 8px;
+}
+
+.wardrobeInfoText {
+  font-size: 14px;
+  color: #f8fafc;
+  line-height: 1.5;
+}
+
+.wardrobeLookupLabel {
+  display: block;
+  font-size: 12px;
+  color: #e2e8f0;
+  margin-bottom: 8px;
+}
+
+.wardrobeLookupInput {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: rgba(15, 23, 42, 0.75);
+  color: #f8fafc;
+  font-size: 14px;
+  font-family: monospace;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+}
+
+.wardrobeLookupBtn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.wardrobeLookupBtn:disabled {
+  background: #64748b;
+  cursor: not-allowed;
+}
+
+/* Consumer: hint under reward */
+.rewardFollowHint {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 8px;
+}
+
+/* Consumer: EOL → recycler (green, clickable) */
+.eolToRecyclerBtn {
+  width: 100%;
+  background: rgba(5, 150, 105, 0.12);
+  border: 1px solid #059669;
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  margin-bottom: 16px;
+}
+
+.eolToRecyclerTitle {
+  color: #059669;
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.eolToRecyclerHint {
+  font-size: 12px;
+  color: #6ee7b7;
+  margin: 0;
+}
