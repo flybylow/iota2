@@ -1,22 +1,25 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { DPP as DPPType, DPP_STATUS } from '@/lib/types';
 import * as storage from '@/lib/storage-blockchain';
 import { useCurrentAccount, useSignAndExecuteTransaction, ConnectButton } from '@iota/dapp-kit';
 
 interface Tab {
-  id: 'manufacturer' | 'consumer' | 'recycler' | 'registry';
+  id: 'manufacturer' | 'consumer' | 'recycler' | 'wardrobe';
   label: string;
   color: string;
 }
+
+type StorageSignAndExecute = Parameters<typeof storage.createDPPWithPTB>[4];
 
 const DPPApp = () => {
   // Wallet connection
   const currentAccount = useCurrentAccount();
   const { mutate: signAndExecute } = useSignAndExecuteTransaction();
+  const signTx = signAndExecute as unknown as StorageSignAndExecute;
 
-  const [activeTab, setActiveTab] = useState<'manufacturer' | 'consumer' | 'recycler' | 'registry'>('manufacturer');
+  const [activeTab, setActiveTab] = useState<'manufacturer' | 'consumer' | 'recycler' | 'wardrobe'>('manufacturer');
 
   // Current DPP being viewed
   const [currentDPP, setCurrentDPP] = useState<DPPType | null>(null);
@@ -39,11 +42,17 @@ const DPPApp = () => {
   // PTB mode toggle
   const [usePTB, setUsePTB] = useState(true);
 
+  // After PTB create + index: show QR linking to ?gtin= for demos
+  const [postPtbQrGtin, setPostPtbQrGtin] = useState<string | null>(null);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
+  const [openingConsumerFromQr, setOpeningConsumerFromQr] = useState(false);
+  const urlGtinHandled = useRef(false);
+
   // Load DPPs from storage on mount
   useEffect(() => {
     loadDPPs();
     console.log('========================================');
-    console.log('DPP APP INITIALIZED - WORKSHOP II');
+    console.log('DPP APP INITIALIZED');
     console.log('========================================');
     console.log('Features: Registry + PTB + Tables');
     console.log('Network: IOTA Testnet');
@@ -57,6 +66,55 @@ const DPPApp = () => {
       setConsumerRewardAddress(currentAccount.address);
     }
   }, [currentAccount?.address]);
+
+  // Generate QR data URL for the share link (client-only)
+  useEffect(() => {
+    if (!postPtbQrGtin) {
+      setQrDataUrl(null);
+      return;
+    }
+    const url =
+      typeof window !== 'undefined'
+        ? `${window.location.origin}${window.location.pathname}?gtin=${encodeURIComponent(postPtbQrGtin)}`
+        : '';
+    if (!url) return;
+
+    let cancelled = false;
+    import('qrcode')
+      .then((QR) =>
+        QR.default.toDataURL(url, {
+          width: 240,
+          margin: 2,
+          color: { dark: '#0f172a', light: '#ffffff' },
+        })
+      )
+      .then((dataUrl) => {
+        if (!cancelled) setQrDataUrl(dataUrl);
+      })
+      .catch(() => {
+        if (!cancelled) setQrDataUrl(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [postPtbQrGtin]);
+
+  // Open app from QR: ?gtin=... → registry lookup → consumer view
+  useEffect(() => {
+    if (urlGtinHandled.current || typeof window === 'undefined') return;
+    const g = new URLSearchParams(window.location.search).get('gtin');
+    if (!g?.trim()) return;
+    urlGtinHandled.current = true;
+
+    (async () => {
+      const dpp = await storage.getDPPByGTIN(g.trim());
+      if (dpp) {
+        setLookupGtin(g.trim());
+        setCurrentDPP(dpp);
+        setActiveTab('consumer');
+      }
+    })();
+  }, []);
 
   async function loadDPPs() {
     if (!currentAccount) return;
@@ -109,7 +167,7 @@ const DPPApp = () => {
         material,
         lockedReward,
         currentAccount.address,
-        signAndExecute
+        signTx
       );
       console.log('PTB Result - Indexed:', result.indexed);
     } else {
@@ -119,15 +177,20 @@ const DPPApp = () => {
         material,
         lockedReward,
         currentAccount.address,
-        signAndExecute
+        signTx
       );
     }
 
     if (result.success) {
+      const gtinUsed = gtin.trim();
       console.log('Transaction ID:', result.transactionId);
       console.log('DPP ID:', result.dppId);
       console.log('Explorer: https://explorer.iota.org/txblock/' + result.transactionId + '?network=testnet');
       console.log('========================================\n');
+
+      if (usePTB) {
+        setPostPtbQrGtin(gtinUsed);
+      }
 
       // Refresh DPPs
       setTimeout(async () => {
@@ -151,6 +214,28 @@ const DPPApp = () => {
     }
 
     setCreating(false);
+  }
+
+  /** Open Consumer tab with this GTIN — same path as scanning the QR (?gtin=). */
+  async function handleOpenConsumerFromQr() {
+    if (!postPtbQrGtin?.trim()) return;
+    setOpeningConsumerFromQr(true);
+    try {
+      let dpp = await storage.getDPPByGTIN(postPtbQrGtin.trim());
+      if (!dpp) {
+        await new Promise((r) => setTimeout(r, 1500));
+        dpp = await storage.getDPPByGTIN(postPtbQrGtin.trim());
+      }
+      if (dpp) {
+        setLookupGtin(postPtbQrGtin.trim());
+        setCurrentDPP(dpp);
+        setActiveTab('consumer');
+      } else {
+        alert('Could not load this passport from the registry yet. Wait a few seconds and try again.');
+      }
+    } finally {
+      setOpeningConsumerFromQr(false);
+    }
   }
 
   async function handleLookupGTIN() {
@@ -191,7 +276,7 @@ const DPPApp = () => {
 
     setMarking(true);
 
-    const result = await storage.markEndOfLife(currentDPP.id, signAndExecute);
+    const result = await storage.markEndOfLife(currentDPP.id, signTx as Parameters<typeof storage.markEndOfLife>[1]);
 
     if (result.success) {
       console.log('Transaction ID:', result.transactionId);
@@ -219,7 +304,7 @@ const DPPApp = () => {
 
     setVerifying(true);
 
-    const result = await storage.verifyAndUnlock(currentDPP.id, signAndExecute);
+    const result = await storage.verifyAndUnlock(currentDPP.id, signTx as Parameters<typeof storage.verifyAndUnlock>[1]);
 
     if (result.success) {
       console.log('Transaction ID:', result.transactionId);
@@ -279,7 +364,7 @@ const DPPApp = () => {
               Digital Product Passport
             </h1>
             <p style={{ color: '#94a3b8', fontSize: '14px' }}>
-              Workshop II: Registry + Tables + PTB
+              Tabulas · MasterZ × IOTA Hackathon
             </p>
             <p style={{ color: '#64748b', fontSize: '12px', marginTop: '4px' }}>
               IOTA Testnet
@@ -288,20 +373,20 @@ const DPPApp = () => {
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '8px', width: 'fit-content' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
               <button
-                onClick={() => setActiveTab('registry')}
+                onClick={() => setActiveTab('wardrobe')}
                 style={{
                   padding: '10px 20px',
                   borderRadius: '12px',
-                  border: activeTab === 'registry' ? '2px solid #8b5cf6' : '2px solid #334155',
-                  background: activeTab === 'registry' ? '#8b5cf620' : 'transparent',
-                  color: activeTab === 'registry' ? '#8b5cf6' : '#94a3b8',
+                  border: activeTab === 'wardrobe' ? '2px solid #8b5cf6' : '2px solid #334155',
+                  background: activeTab === 'wardrobe' ? '#8b5cf620' : 'transparent',
+                  color: activeTab === 'wardrobe' ? '#8b5cf6' : '#94a3b8',
                   cursor: 'pointer',
                   fontWeight: '600',
                   fontSize: '14px',
                   transition: 'all 0.2s ease',
                 }}
               >
-                Registry
+                Wardrobe
               </button>
               <ConnectButton />
             </div>
@@ -309,11 +394,8 @@ const DPPApp = () => {
               <div style={{
                 width: '100%',
                 textAlign: 'center',
-                padding: '8px 16px',
-                background: '#22c55e20',
-                borderRadius: '8px',
                 fontSize: '12px',
-                color: '#22c55e',
+                color: '#f8fafc',
                 fontFamily: 'monospace',
               }}>
                 Connected: {currentAccount.address.slice(0, 8)}...{currentAccount.address.slice(-6)}
@@ -365,229 +447,353 @@ const DPPApp = () => {
         {/* MANUFACTURER VIEW */}
         {activeTab === 'manufacturer' && (
           <div>
-            <h2 style={{ fontSize: '20px', marginBottom: '24px', color: '#2563eb' }}>
-              Create Digital Product Passport
-            </h2>
+            {!postPtbQrGtin ? (
+              <>
+                <h2 style={{ fontSize: '20px', marginBottom: '24px', color: '#2563eb' }}>
+                  Create Digital Product Passport
+                </h2>
 
-            {/* PTB Toggle */}
-            <div style={{
-              marginBottom: '20px',
-              padding: '12px',
-              background: usePTB ? '#8b5cf620' : '#33415520',
-              border: `1px solid ${usePTB ? '#8b5cf6' : '#334155'}`,
-              borderRadius: '8px',
-            }}>
-              <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
-                <input
-                  type="checkbox"
-                  checked={usePTB}
-                  onChange={(e) => setUsePTB(e.target.checked)}
-                  style={{ width: '18px', height: '18px' }}
-                />
-                <div>
-                  <div style={{ fontSize: '14px', fontWeight: '600', color: usePTB ? '#8b5cf6' : '#94a3b8' }}>
-                    Use PTB (Atomic Transaction)
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#64748b' }}>
-                    {usePTB ? 'Create + Index in one transaction' : 'Create only (no registry)'}
+                {/* PTB Toggle */}
+                <div style={{
+                  marginBottom: '20px',
+                  padding: '12px',
+                  background: usePTB ? 'rgba(37, 99, 235, 0.12)' : '#33415520',
+                  border: `1px solid ${usePTB ? '#2563eb' : '#334155'}`,
+                  borderRadius: '8px',
+                }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      checked={usePTB}
+                      onChange={(e) => setUsePTB(e.target.checked)}
+                      style={{ width: '18px', height: '18px', accentColor: '#2563eb' }}
+                    />
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: usePTB ? '#2563eb' : '#94a3b8' }}>
+                        Use PTB (Atomic Transaction)
+                      </div>
+                      <div style={{ fontSize: '11px', color: usePTB ? '#60a5fa' : '#64748b' }}>
+                        {usePTB ? 'Create + Index in one transaction' : 'Create only (no registry)'}
+                      </div>
+                    </div>
+                  </label>
+                </div>
+
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '8px' }}>
+                    GTIN (Product Identifier)
+                  </label>
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    <input
+                      type="text"
+                      value={gtin}
+                      onChange={(e) => setGtin(e.target.value)}
+                      placeholder="Enter GTIN..."
+                      style={{
+                        flex: 1,
+                        padding: '14px',
+                        borderRadius: '12px',
+                        border: '1px solid #334155',
+                        background: '#0f172a',
+                        color: '#f8fafc',
+                        fontSize: '14px',
+                        fontFamily: 'monospace',
+                      }}
+                    />
+                    <button
+                      onClick={generateGTIN}
+                      style={{
+                        padding: '14px',
+                        borderRadius: '12px',
+                        border: '1px solid #334155',
+                        background: '#1e293b',
+                        color: '#94a3b8',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                      }}
+                    >
+                      Generate
+                    </button>
                   </div>
                 </div>
-              </label>
-            </div>
 
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '8px' }}>
-                GTIN (Product Identifier)
-              </label>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <input
-                  type="text"
-                  value={gtin}
-                  onChange={(e) => setGtin(e.target.value)}
-                  placeholder="Enter GTIN..."
-                  style={{
-                    flex: 1,
-                    padding: '14px',
-                    borderRadius: '12px',
-                    border: '1px solid #334155',
-                    background: '#0f172a',
-                    color: '#f8fafc',
-                    fontSize: '14px',
-                    fontFamily: 'monospace',
-                  }}
-                />
+                <div style={{ marginBottom: '20px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '8px' }}>
+                    Material Composition
+                  </label>
+                  <select
+                    value={material}
+                    onChange={(e) => setMaterial(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '14px',
+                      borderRadius: '12px',
+                      border: '1px solid #334155',
+                      background: '#0f172a',
+                      color: '#f8fafc',
+                      fontSize: '16px',
+                    }}
+                  >
+                    <option value="100% Organic Cotton">100% Organic Cotton</option>
+                    <option value="100% Cotton">100% Cotton</option>
+                    <option value="Cotton/Polyester Blend">Cotton/Polyester Blend</option>
+                    <option value="100% Polyester">100% Polyester</option>
+                    <option value="Recycled Materials">Recycled Materials</option>
+                  </select>
+                </div>
+
+                <div style={{ marginBottom: '24px' }}>
+                  <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '8px' }}>
+                    Recycling Reward ($)
+                  </label>
+                  <input
+                    type="number"
+                    value={lockedReward}
+                    onChange={(e) => setLockedReward(Number(e.target.value))}
+                    min={1}
+                    max={20}
+                    step={1}
+                    style={{
+                      width: '100%',
+                      padding: '14px',
+                      borderRadius: '12px',
+                      border: '1px solid #334155',
+                      background: '#0f172a',
+                      color: '#f8fafc',
+                      fontSize: '16px',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
                 <button
-                  onClick={generateGTIN}
+                  onClick={handleCreateDPP}
+                  disabled={creating || !gtin.trim()}
                   style={{
-                    padding: '14px',
+                    width: '100%',
+                    padding: '16px',
                     borderRadius: '12px',
-                    border: '1px solid #334155',
-                    background: '#1e293b',
-                    color: '#94a3b8',
-                    cursor: 'pointer',
-                    fontSize: '12px',
+                    border: 'none',
+                    background: creating || !gtin.trim()
+                      ? '#64748b'
+                      : 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                    color: 'white',
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    cursor: creating || !gtin.trim() ? 'not-allowed' : 'pointer',
+                    opacity: creating ? 0.7 : 1,
+                    transition: 'all 0.15s ease',
                   }}
                 >
-                  Generate
+                  {creating && (
+                    <span style={{
+                      display: 'inline-block',
+                      width: '14px',
+                      height: '14px',
+                      border: '2px solid rgba(255,255,255,0.3)',
+                      borderTopColor: 'white',
+                      borderRadius: '50%',
+                      animation: 'spin 0.6s linear infinite',
+                      marginRight: '8px',
+                      verticalAlign: 'middle',
+                    }} />
+                  )}
+                  {creating
+                    ? 'Creating on blockchain...'
+                    : usePTB
+                      ? 'Create DPP + Index (PTB)'
+                      : 'Create DPP'}
                 </button>
-              </div>
-            </div>
-
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '8px' }}>
-                Material Composition
-              </label>
-              <select
-                value={material}
-                onChange={(e) => setMaterial(e.target.value)}
+              </>
+            ) : (
+              <div
                 style={{
-                  width: '100%',
-                  padding: '14px',
-                  borderRadius: '12px',
-                  border: '1px solid #334155',
+                  padding: '20px',
                   background: '#0f172a',
-                  color: '#f8fafc',
-                  fontSize: '16px',
+                  borderRadius: '16px',
+                  border: '1px solid #334155',
+                  textAlign: 'center',
                 }}
               >
-                <option value="100% Organic Cotton">100% Organic Cotton</option>
-                <option value="100% Cotton">100% Cotton</option>
-                <option value="Cotton/Polyester Blend">Cotton/Polyester Blend</option>
-                <option value="100% Polyester">100% Polyester</option>
-                <option value="Recycled Materials">Recycled Materials</option>
-              </select>
-            </div>
-
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '8px' }}>
-                Recycling Reward ($)
-              </label>
-              <input
-                type="number"
-                value={lockedReward}
-                onChange={(e) => setLockedReward(Number(e.target.value))}
-                min={1}
-                max={20}
-                step={1}
-                style={{
-                  width: '100%',
-                  padding: '14px',
-                  borderRadius: '12px',
-                  border: '1px solid #334155',
-                  background: '#0f172a',
-                  color: '#f8fafc',
-                  fontSize: '16px',
-                  boxSizing: 'border-box',
-                }}
-              />
-            </div>
-
-            <button
-              onClick={handleCreateDPP}
-              disabled={creating || !gtin.trim()}
-              style={{
-                width: '100%',
-                padding: '16px',
-                borderRadius: '12px',
-                border: 'none',
-                background: creating || !gtin.trim()
-                  ? '#64748b'
-                  : usePTB
-                    ? 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)'
-                    : 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                color: 'white',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: creating || !gtin.trim() ? 'not-allowed' : 'pointer',
-                opacity: creating ? 0.7 : 1,
-                transition: 'all 0.15s ease',
-              }}
-            >
-              {creating && (
-                <span style={{
-                  display: 'inline-block',
-                  width: '14px',
-                  height: '14px',
-                  border: '2px solid rgba(255,255,255,0.3)',
-                  borderTopColor: 'white',
-                  borderRadius: '50%',
-                  animation: 'spin 0.6s linear infinite',
-                  marginRight: '8px',
-                  verticalAlign: 'middle',
-                }} />
-              )}
-              {creating
-                ? 'Creating on blockchain...'
-                : usePTB
-                  ? 'Create DPP + Index (PTB)'
-                  : 'Create DPP'}
-            </button>
+                <div style={{ fontSize: '14px', fontWeight: '600', color: '#22c55e', marginBottom: '16px' }}>
+                  DPP created & indexed
+                </div>
+                <button
+                  type="button"
+                  onClick={() => void handleOpenConsumerFromQr()}
+                  disabled={openingConsumerFromQr}
+                  title="Open Consumer view for this GTIN"
+                  style={{
+                    display: 'inline-block',
+                    padding: '12px',
+                    background: '#fff',
+                    borderRadius: '12px',
+                    marginBottom: '12px',
+                    border: '2px solid #059669',
+                    cursor: openingConsumerFromQr ? 'wait' : 'pointer',
+                    lineHeight: 0,
+                  }}
+                >
+                  {qrDataUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={qrDataUrl} alt="QR code — click to open Consumer passport" width={220} height={220} />
+                  ) : (
+                    <div
+                      style={{
+                        width: 220,
+                        height: 220,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#64748b',
+                        fontSize: '13px',
+                      }}
+                    >
+                      Generating QR…
+                    </div>
+                  )}
+                </button>
+                <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '12px' }}>
+                  Click the QR to open the Consumer view (same as scanning it).
+                </div>
+                <div
+                  style={{
+                    fontSize: '11px',
+                    color: '#64748b',
+                    fontFamily: 'monospace',
+                    wordBreak: 'break-all',
+                    marginBottom: '12px',
+                    textAlign: 'left',
+                  }}
+                >
+                  {typeof window !== 'undefined'
+                    ? `${window.location.origin}${window.location.pathname}?gtin=${encodeURIComponent(postPtbQrGtin)}`
+                    : `?gtin=${encodeURIComponent(postPtbQrGtin)}`}
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <button
+                    type="button"
+                    onClick={() => setPostPtbQrGtin(null)}
+                    style={{
+                      padding: '10px 16px',
+                      borderRadius: '10px',
+                      border: '1px solid #334155',
+                      background: 'transparent',
+                      color: '#94a3b8',
+                      fontSize: '13px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Create another
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
-        {/* REGISTRY VIEW */}
-        {activeTab === 'registry' && (
+        {/* WARDROBE (registry lookup) */}
+        {activeTab === 'wardrobe' && (
           <div>
-            <h2 style={{ fontSize: '20px', marginBottom: '24px', color: '#8b5cf6' }}>
-              Registry Lookup
-            </h2>
-
-            <div style={{
-              background: '#8b5cf620',
-              border: '1px solid #8b5cf640',
-              borderRadius: '12px',
-              padding: '16px',
-              marginBottom: '24px',
-            }}>
-              <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '8px' }}>
-                Workshop II Feature
-              </div>
-              <div style={{ fontSize: '14px', color: '#f8fafc' }}>
-                The Registry is a <strong>shared object</strong> with a <strong>Table&lt;String, ID&gt;</strong> mapping GTINs to DPP IDs.
-              </div>
-            </div>
-
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '12px', color: '#94a3b8', marginBottom: '8px' }}>
-                Lookup DPP by GTIN
-              </label>
-              <input
-                type="text"
-                value={lookupGtin}
-                onChange={(e) => setLookupGtin(e.target.value)}
-                placeholder="Enter GTIN to lookup..."
+            <div
+              style={{
+                position: 'relative',
+                borderRadius: '16px',
+                overflow: 'hidden',
+                marginBottom: '24px',
+                border: '1px solid #334155',
+                minHeight: '380px',
+              }}
+            >
+              <div
+                aria-hidden
                 style={{
-                  width: '100%',
-                  padding: '14px',
-                  borderRadius: '12px',
-                  border: '1px solid #334155',
-                  background: '#0f172a',
-                  color: '#f8fafc',
-                  fontSize: '14px',
-                  fontFamily: 'monospace',
-                  marginBottom: '12px',
-                  boxSizing: 'border-box',
+                  position: 'absolute',
+                  inset: 0,
+                  backgroundImage: 'url(/wardrobe.png)',
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center',
                 }}
               />
-              <button
-                onClick={handleLookupGTIN}
-                disabled={looking || !lookupGtin.trim()}
+              <div
+                aria-hidden
                 style={{
-                  width: '100%',
-                  padding: '14px',
-                  borderRadius: '12px',
-                  border: 'none',
-                  background: looking || !lookupGtin.trim()
-                    ? '#64748b'
-                    : 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
-                  color: 'white',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: looking || !lookupGtin.trim() ? 'not-allowed' : 'pointer',
+                  position: 'absolute',
+                  inset: 0,
+                  background:
+                    'linear-gradient(180deg, rgba(15,23,42,0.88) 0%, rgba(15,23,42,0.82) 45%, rgba(15,23,42,0.92) 100%)',
                 }}
-              >
-                {looking ? 'Searching...' : 'Lookup in Registry'}
-              </button>
+              />
+              <div style={{ position: 'relative', zIndex: 1, padding: '24px' }}>
+                <h2 style={{ fontSize: '22px', marginBottom: '8px', color: '#e9d5ff', fontWeight: '700' }}>
+                  Wardrobe lookup
+                </h2>
+                <p style={{ fontSize: '13px', color: '#c4b5fd', marginBottom: '20px', opacity: 0.95 }}>
+                  Find a passport by the GTIN on the label.
+                </p>
+
+                <div
+                  style={{
+                    background: 'rgba(15, 23, 42, 0.65)',
+                    backdropFilter: 'blur(8px)',
+                    border: '1px solid rgba(139, 92, 246, 0.35)',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    marginBottom: '20px',
+                  }}
+                >
+                  <div style={{ fontSize: '12px', color: '#c4b5fd', marginBottom: '8px' }}>
+                    Wardrobe (GTIN → DPP)
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#f8fafc', lineHeight: 1.5 }}>
+                    On-chain, a <strong>shared registry</strong> holds a <strong>Table&lt;String, ID&gt;</strong> mapping GTINs to DPP IDs — your digital wardrobe.
+                  </div>
+                </div>
+
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', color: '#e2e8f0', marginBottom: '8px' }}>
+                    Lookup DPP by GTIN
+                  </label>
+                  <input
+                    type="text"
+                    value={lookupGtin}
+                    onChange={(e) => setLookupGtin(e.target.value)}
+                    placeholder="Enter GTIN to lookup..."
+                    style={{
+                      width: '100%',
+                      padding: '14px',
+                      borderRadius: '12px',
+                      border: '1px solid rgba(148, 163, 184, 0.4)',
+                      background: 'rgba(15, 23, 42, 0.75)',
+                      color: '#f8fafc',
+                      fontSize: '14px',
+                      fontFamily: 'monospace',
+                      marginBottom: '12px',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                  <button
+                    onClick={handleLookupGTIN}
+                    disabled={looking || !lookupGtin.trim()}
+                    style={{
+                      width: '100%',
+                      padding: '14px',
+                      borderRadius: '12px',
+                      border: 'none',
+                      background:
+                        looking || !lookupGtin.trim()
+                          ? '#64748b'
+                          : 'linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%)',
+                      color: 'white',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: looking || !lookupGtin.trim() ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    {looking ? 'Searching...' : 'Lookup in Wardrobe'}
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Show owned DPPs */}
@@ -652,7 +858,7 @@ const DPPApp = () => {
                 <div style={{ fontSize: '48px', marginBottom: '16px' }}>📱</div>
                 <p>No product selected</p>
                 <p style={{ fontSize: '12px', marginTop: '8px' }}>
-                  Create one in Manufacturer tab or lookup by GTIN in Registry
+                  Create one in Manufacturer tab or lookup by GTIN in Wardrobe
                 </p>
               </div>
             ) : currentDPP.status === DPP_STATUS.RECYCLED ? (
@@ -698,9 +904,16 @@ const DPPApp = () => {
                       <span>Status</span>
                       <span style={{ color: '#f8fafc' }}>{getStatusLabel(currentDPP.status)}</span>
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '8px 0' }}>
-                      <span>Recycling Reward</span>
-                      <span style={{ color: '#22c55e', fontWeight: '600' }}>${currentDPP.lockedReward.toFixed(2)}</span>
+                    <div style={{ padding: '8px 0' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span>Recycling Reward</span>
+                        <span style={{ color: '#22c55e', fontWeight: '600' }}>${currentDPP.lockedReward.toFixed(2)}</span>
+                      </div>
+                      {currentDPP.status === DPP_STATUS.ACTIVE && (
+                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '8px' }}>
+                          Bring to recycling point to claim
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -721,21 +934,6 @@ const DPPApp = () => {
 
                 {currentDPP.status === DPP_STATUS.ACTIVE && (
                   <>
-                    <div style={{
-                      background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
-                      borderRadius: '12px',
-                      padding: '20px',
-                      marginBottom: '20px',
-                      textAlign: 'center',
-                    }}>
-                      <p style={{ fontWeight: '600', marginBottom: '4px' }}>
-                        ${currentDPP.lockedReward.toFixed(2)} waiting for you
-                      </p>
-                      <p style={{ fontSize: '12px', opacity: 0.9 }}>
-                        Bring to recycling point to claim
-                      </p>
-                    </div>
-
                     <div style={{ marginBottom: '20px' }}>
                       <label style={{ display: 'block', fontSize: '14px', color: '#94a3b8', marginBottom: '8px' }}>
                         Your wallet address (for reward payout)
@@ -789,7 +987,7 @@ const DPPApp = () => {
                         border: 'none',
                         background: marking
                           ? '#64748b'
-                          : 'linear-gradient(135deg, #d97706 0%, #b45309 100%)',
+                          : 'linear-gradient(135deg, #059669 0%, #047857 100%)',
                         color: 'white',
                         fontSize: '16px',
                         fontWeight: '600',
@@ -816,20 +1014,29 @@ const DPPApp = () => {
                 )}
 
                 {currentDPP.status === DPP_STATUS.END_OF_LIFE && (
-                  <div style={{
-                    background: '#d9770620',
-                    border: '1px solid #d97706',
-                    borderRadius: '12px',
-                    padding: '20px',
-                    textAlign: 'center',
-                  }}>
-                    <p style={{ color: '#d97706', fontWeight: '600', marginBottom: '4px' }}>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('recycler')}
+                    title="Open Recycler — verify & unlock"
+                    style={{
+                      width: '100%',
+                      background: 'rgba(5, 150, 105, 0.12)',
+                      border: '1px solid #059669',
+                      borderRadius: '12px',
+                      padding: '20px',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                      font: 'inherit',
+                      color: 'inherit',
+                    }}
+                  >
+                    <p style={{ color: '#059669', fontWeight: '600', margin: '0 0 4px 0' }}>
                       Awaiting Recycler Confirmation
                     </p>
-                    <p style={{ fontSize: '12px', color: '#94a3b8' }}>
+                    <p style={{ fontSize: '12px', color: '#6ee7b7', margin: 0 }}>
                       Bring product to a recycling point
                     </p>
-                  </div>
+                  </button>
                 )}
 
                 <button
@@ -879,14 +1086,15 @@ const DPPApp = () => {
             ) : currentDPP.status === DPP_STATUS.RECYCLED ? (
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: '64px', marginBottom: '16px' }}>Done</div>
-                <h3 style={{ color: '#22c55e', marginBottom: '16px' }}>Recycling Verified</h3>
+                <h3 style={{ color: '#d97706', marginBottom: '16px' }}>Recycling Verified</h3>
                 <div style={{
                   background: '#0f172a',
                   borderRadius: '12px',
                   padding: '16px',
                   fontSize: '14px',
+                  border: '1px solid rgba(217, 119, 6, 0.35)',
                 }}>
-                  <p style={{ color: '#94a3b8', marginBottom: '8px' }}>
+                  <p style={{ color: '#fb923c', marginBottom: '0', fontWeight: '600' }}>
                     ${currentDPP.originalReward.toFixed(2)} released to consumer
                   </p>
                 </div>
@@ -950,7 +1158,7 @@ const DPPApp = () => {
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                       <span>Locked Reward</span>
-                      <span style={{ color: '#22c55e', fontWeight: '600' }}>${currentDPP.lockedReward.toFixed(2)}</span>
+                      <span style={{ color: '#d97706', fontWeight: '600' }}>${currentDPP.lockedReward.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
@@ -977,7 +1185,7 @@ const DPPApp = () => {
                     padding: '16px',
                     borderRadius: '12px',
                     border: 'none',
-                    background: verifying ? '#64748b' : 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                    background: verifying ? '#64748b' : 'linear-gradient(135deg, #d97706 0%, #b45309 100%)',
                     color: 'white',
                     fontSize: '16px',
                     fontWeight: '600',
@@ -1014,7 +1222,6 @@ const DPPApp = () => {
         color: '#64748b',
       }}>
         <p>Built for MasterZ x IOTA Hackathon</p>
-        <p style={{ marginTop: '4px' }}>Tabulas - Circular Economy Infrastructure</p>
       </div>
     </div>
   );

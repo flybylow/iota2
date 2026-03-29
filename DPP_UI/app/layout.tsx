@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Digital Product Passport | Workshop II",
-  description: "DPP system with Registry, Tables & PTB support. Built for MasterZ x IOTA Hackathon.",
+  title: "Digital Product Passport | Tabulas · MasterZ × IOTA",
+  description: "Digital Product Passport with on-chain registry and PTB. MasterZ × IOTA Hackathon.",
 };
 
 export default function RootLayout({

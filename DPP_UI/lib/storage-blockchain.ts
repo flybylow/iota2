@@ -5,7 +5,7 @@
 
 import { IotaClient, getFullnodeUrl } from '@iota/iota-sdk/client';
 import { Transaction } from '@iota/iota-sdk/transactions';
-import { DPP, DPPEvent, DPP_STATUS, TransactionResult, PTBResult } from './types';
+import { DPP, DPPStatus, DPPEvent, DPP_STATUS, TransactionResult, PTBResult } from './types';
 
 const PACKAGE_ID = process.env.NEXT_PUBLIC_PACKAGE_ID ?? '';
 const ADMIN_CAP_ID = process.env.NEXT_PUBLIC_ADMIN_CAP_ID ?? '';
@@ -97,7 +97,7 @@ export async function getDPPsByOwner(ownerAddress: string): Promise<DPP[]> {
           lockedReward: currentReward,
           originalReward: originalReward,
           consumer: fields.consumer || null,
-          status: Number(fields.status),
+          status: Number(fields.status) as DPPStatus,
           createdAt: Number(fields.created_at),
           endOfLifeAt: fields.end_of_life_at ? Number(fields.end_of_life_at) : null,
           manufacturer: manufacturerAddress,
@@ -134,10 +134,10 @@ export async function getDPPByGTIN(gtin: string): Promise<DPP | null> {
     // Query DPPIndexed events to find the DPP ID for this GTIN (some RPC nodes reject queryEvents)
     let indexedEvents: { data: Array<{ parsedJson: { gtin: string; dpp_id: string } }> };
     try {
-      indexedEvents = await client.queryEvents({
+      indexedEvents = (await client.queryEvents({
         query: { MoveEventType: `${PACKAGE_ID}::registry::DPPIndexed` },
         limit: 100,
-      });
+      })) as { data: Array<{ parsedJson: { gtin: string; dpp_id: string } }> };
     } catch {
       indexedEvents = { data: [] };
     }
@@ -216,7 +216,7 @@ export async function getDPPById(id: string): Promise<DPP | null> {
       lockedReward: Number(fields.locked_reward),
       originalReward,
       consumer: fields.consumer || null,
-      status: Number(fields.status),
+      status: Number(fields.status) as DPPStatus,
       createdAt: Number(fields.created_at),
       endOfLifeAt: fields.end_of_life_at ? Number(fields.end_of_life_at) : null,
       manufacturer,
