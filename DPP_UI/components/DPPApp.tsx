@@ -49,6 +49,8 @@ const DPPApp = () => {
   const [marking, setMarking] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [looking, setLooking] = useState(false);
+  const [transferring, setTransferring] = useState(false);
+  const [transferAddress, setTransferAddress] = useState("");
 
   const [postPtbQrGtin, setPostPtbQrGtin] = useState<string | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
@@ -228,6 +230,34 @@ const DPPApp = () => {
     setMarking(false);
   }
 
+  async function handleTransferOwnership() {
+    if (!currentDPP || !currentAccount) return;
+
+    if (!transferAddress.trim()) {
+      alert("Please enter the recipient address to transfer ownership.");
+      return;
+    }
+
+    setTransferring(true);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = await storage.transferOwnership(currentDPP.id, transferAddress.trim(), signAndExecute as any);
+
+    if (result.success) {
+      alert(`Ownership transferred to ${transferAddress.trim()}`);
+      setTransferAddress("");
+      setTimeout(async () => {
+        await loadDPPs();
+        const updated = await storage.getDPPById(currentDPP.id);
+        setCurrentDPP(updated);
+      }, 2000);
+    } else {
+      alert("Failed to transfer ownership: " + result.error);
+    }
+
+    setTransferring(false);
+  }
+
   async function handleVerifyAndUnlock() {
     if (!currentDPP || !currentAccount) return;
     setVerifying(true);
@@ -345,6 +375,10 @@ const DPPApp = () => {
             setConsumerRewardAddress={setConsumerRewardAddress}
             walletAddress={currentAccount?.address}
             marking={marking}
+            transferring={transferring}
+            transferAddress={transferAddress}
+            setTransferAddress={setTransferAddress}
+            onTransferOwnership={handleTransferOwnership}
             onMarkEndOfLife={handleMarkEndOfLife}
             onReset={handleReset}
             onGoToRecycler={() => setActiveTab("recycler")}
