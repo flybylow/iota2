@@ -3,6 +3,6 @@
   "private": true,
   "description": "Monorepo root — Next.js app lives in DPP_UI (Vercel build cwd).",
   "scripts": {
-    "vercel-build": "cd DPP_UI && npm ci && npm run build"
+    "vercel-build": "cd DPP_UI && npm ci && npm run build && cd .. && rm -rf .next && cp -a DPP_UI/.next .next"
   }
 }
