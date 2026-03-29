@@ -249,7 +249,7 @@ const DPPApp = () => {
       setTimeout(async () => {
         await loadDPPs();
         const updated = await storage.getDPPById(currentDPP.id);
-        if (updated && currentAccount && (updated as DPPType).owner === currentAccount.address) {
+        if (updated && currentAccount && updated.consumer === currentAccount.address) {
           setCurrentDPP(updated);
         } else {
           // Clear selection if the connected wallet is no longer the owner
