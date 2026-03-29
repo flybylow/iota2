@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Digital Product Passport | Tabulas · MasterZ × IOTA",
-  description: "Digital Product Passport with on-chain registry and PTB. MasterZ × IOTA Hackathon.",
+  title: "Textile Tracer | Tabulas · MasterZ × IOTA",
+  description: "Textile Tracer — digital product passport with on-chain registry and PTB. MasterZ × IOTA Hackathon.",
 };
 
 export const viewport: Viewport = {

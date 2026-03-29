@@ -250,9 +250,9 @@ const DPPApp = () => {
       <div className={styles.header}>
         <div className={styles.headerTop}>
           <div className={styles.headerTitles}>
-            <h1 className={styles.title}>Digital Product Passport</h1>
+            <h1 className={styles.title}>Textile Tracer</h1>
             <p className={styles.subtitle}>
-              Tabulas · MasterZ × IOTA Hackathon - IOTA Testnet
+              MasterZ × IOTA Hackathon · Tabulas ·
             </p>
           </div>
           <div className={styles.walletSection}>
@@ -361,7 +361,16 @@ const DPPApp = () => {
       </div>
 
       <div className={styles.footer}>
-        <p>Built for MasterZ x IOTA Hackathon</p>
+        <p>
+          <a
+            href="https://www.masterzblockchain.com/en/masterz-iota"
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.footerLink}
+          >
+            Built for MasterZ × IOTA Hackathon
+          </a>
+        </p>
       </div>
     </div>
   );

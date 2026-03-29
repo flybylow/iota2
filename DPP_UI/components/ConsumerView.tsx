@@ -40,7 +40,9 @@ export default function ConsumerView({
 
       {!currentDPP ? (
         <div className={styles.emptyState}>
-          <div className={styles.emoji}>📱</div>
+          <div className={styles.emoji} aria-hidden>
+            👕
+          </div>
           <p>No product selected</p>
           <p className={styles.emptyHint}>
             Create one in Manufacturer tab or lookup by GTIN in Wardrobe
