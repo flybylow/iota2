@@ -727,9 +727,7 @@ export async function verifyAndUnlock(
   }
 }
 
-/**
- * Clear all data (not applicable for blockchain)
- */
+
 export function clearAllData(): void {
   console.log("Cannot clear blockchain data");
 }
