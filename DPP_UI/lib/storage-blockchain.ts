@@ -631,6 +631,55 @@ export async function markEndOfLife(
 }
 
 /**
+ * Transfer DPP ownership to a new consumer
+ */
+export async function transferOwnership(
+  dppId: string,
+  newConsumerAddress: string,
+  signAndExecute: (
+    args: { transaction: Transaction },
+    callbacks: {
+      onSuccess: (result: unknown) => void;
+      onError: (error: unknown) => void;
+    },
+  ) => void,
+): Promise<TransactionResult> {
+  try {
+    const pkg = requireEnv("NEXT_PUBLIC_PACKAGE_ID", PACKAGE_ID);
+    const tx = new Transaction();
+
+    tx.moveCall({
+      target: `${pkg}::dpp::transfer_ownership`,
+      arguments: [
+        tx.object(dppId),
+        tx.pure.address(newConsumerAddress),
+        tx.object(CLOCK_ID),
+      ],
+    });
+
+    return new Promise((resolve) => {
+      signAndExecute(
+        { transaction: tx },
+        {
+          onSuccess: (result: unknown) => {
+            const txResult = result as { digest: string };
+            console.log("Ownership transferred:", txResult.digest);
+            resolve({ success: true, transactionId: txResult.digest });
+          },
+          onError: (error: unknown) => {
+            console.error("Error transferring ownership:", error);
+            resolve({ success: false, error: (error as Error).message });
+          },
+        },
+      );
+    });
+  } catch (error) {
+    console.error("Error transferring ownership transaction:", error);
+    return { success: false, error: (error as Error).message };
+  }
+}
+
+/**
  * Verify and unlock reward (blockchain transaction)
  */
 export async function verifyAndUnlock(
@@ -678,9 +727,7 @@ export async function verifyAndUnlock(
   }
 }
 
-/**
- * Clear all data (not applicable for blockchain)
- */
+
 export function clearAllData(): void {
   console.log("Cannot clear blockchain data");
 }

@@ -10,6 +10,10 @@ interface Props {
   setConsumerRewardAddress: (v: string) => void;
   walletAddress: string | undefined;
   marking: boolean;
+  transferring: boolean;
+  transferAddress: string;
+  setTransferAddress: (v: string) => void;
+  onTransferOwnership: () => void;
   onMarkEndOfLife: () => void;
   onReset: () => void;
   onGoToRecycler: () => void;
@@ -28,6 +32,10 @@ export default function ConsumerView({
   setConsumerRewardAddress,
   walletAddress,
   marking,
+  transferring,
+  transferAddress,
+  setTransferAddress,
+  onTransferOwnership,
   onMarkEndOfLife,
   onReset,
   onGoToRecycler,
@@ -80,6 +88,12 @@ export default function ConsumerView({
                 <span>Status</span>
                 <span className={styles.lightValue}>{getStatusLabel(currentDPP.status)}</span>
               </div>
+              <div className={styles.detailRow}>
+                <span>Current Owner</span>
+                <span className={styles.monoValue}>
+                  {currentDPP.consumer ? currentDPP.consumer : "Not set"}
+                </span>
+              </div>
               <div className={styles.detailRowLast}>
                 <span>Recycling Reward</span>
                 <span className={styles.rewardValue}>${currentDPP.lockedReward.toFixed(2)}</span>
@@ -125,6 +139,64 @@ export default function ConsumerView({
                   >
                     Use my connected wallet
                   </button>
+                )}
+              </div>
+
+              <div className={styles.formGroup}>
+                <label className={styles.addressLabel}>Transfer ownership to</label>
+                <p className={styles.addressHint}>
+                  Enter an address to transfer ownership of the product. You must be the current
+                  owner and product status must be Active.
+                </p>
+                <input
+                  type="text"
+                  value={transferAddress}
+                  onChange={(e) => setTransferAddress(e.target.value)}
+                  placeholder="0x..."
+                  className={styles.addressInput}
+                />
+                <button
+                  type="button"
+                  onClick={onTransferOwnership}
+                  disabled={
+                    transferring ||
+                    !walletAddress ||
+                    !currentDPP ||
+                    currentDPP.consumer !== walletAddress
+                  }
+                  className={styles.primaryBtn}
+                  style={{
+                    background:
+                      transferring ||
+                      !walletAddress ||
+                      !currentDPP ||
+                      currentDPP.consumer !== walletAddress
+                        ? "#64748b"
+                        : "linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)",
+                    cursor:
+                      transferring ||
+                      !walletAddress ||
+                      !currentDPP ||
+                      currentDPP.consumer !== walletAddress
+                        ? "not-allowed"
+                        : "pointer",
+                    opacity:
+                      transferring ||
+                      !walletAddress ||
+                      !currentDPP ||
+                      currentDPP.consumer !== walletAddress
+                        ? 0.7
+                        : 1,
+                    marginTop: "8px",
+                  }}
+                >
+                  {transferring && <span className={styles.spinner} />}
+                  {transferring ? "Transferring..." : "Transfer Ownership"}
+                </button>
+                {(!walletAddress || !currentDPP || currentDPP.consumer !== walletAddress) && (
+                  <p className={styles.addressHint}>
+                    Transfer is only available when your connected wallet is the current owner.
+                  </p>
                 )}
               </div>
 
