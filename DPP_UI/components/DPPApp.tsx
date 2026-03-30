@@ -376,6 +376,8 @@ const DPPApp = () => {
         {activeTab === "consumer" && (
           <ConsumerView
             currentDPP={currentDPP}
+            allDPPs={allDPPs}
+            onSelectDPP={setCurrentDPP}
             consumerRewardAddress={consumerRewardAddress}
             setConsumerRewardAddress={setConsumerRewardAddress}
             walletAddress={currentAccount?.address}

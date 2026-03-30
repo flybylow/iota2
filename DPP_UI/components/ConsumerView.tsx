@@ -6,6 +6,8 @@ import styles from "./DPPApp.module.css";
 
 interface Props {
   currentDPP: DPP | null;
+  allDPPs: DPP[];
+  onSelectDPP: (dpp: DPP) => void;
   consumerRewardAddress: string;
   setConsumerRewardAddress: (v: string) => void;
   walletAddress: string | undefined;
@@ -28,6 +30,8 @@ function getStatusLabel(status: number) {
 
 export default function ConsumerView({
   currentDPP,
+  allDPPs,
+  onSelectDPP,
   consumerRewardAddress,
   setConsumerRewardAddress,
   walletAddress,
@@ -43,8 +47,41 @@ export default function ConsumerView({
   return (
     <div>
       <h2 className={styles.sectionTitle} style={{ color: "#059669" }}>
-        My Product
+        My Wardrobe
       </h2>
+
+      {allDPPs.length > 1 && (
+        <div className={styles.dppsList} style={{ marginBottom: "20px" }}>
+          <div className={styles.dppsCountLabel}>Your textiles ({allDPPs.length})</div>
+          {allDPPs.map((dpp) => (
+            <div
+              key={dpp.id}
+              onClick={() => onSelectDPP(dpp)}
+              className={styles.dppItem}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") onSelectDPP(dpp); }}
+              style={{ outline: currentDPP?.id === dpp.id ? "2px solid #059669" : undefined }}
+            >
+              <div className={styles.dppItemRow}>
+                <div>
+                  <div className={styles.dppGtin}>GTIN: {dpp.gtin}</div>
+                  <div className={styles.dppMaterial}>{dpp.material}</div>
+                </div>
+                <div
+                  className={styles.statusBadge}
+                  style={{
+                    background: dpp.status === DPP_STATUS.ACTIVE ? "#22c55e20" : dpp.status === DPP_STATUS.END_OF_LIFE ? "#f59e0b20" : "#8b5cf620",
+                    color: dpp.status === DPP_STATUS.ACTIVE ? "#22c55e" : dpp.status === DPP_STATUS.END_OF_LIFE ? "#f59e0b" : "#8b5cf6",
+                  }}
+                >
+                  {getStatusLabel(dpp.status)}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       {!currentDPP ? (
         <div className={styles.emptyState}>
