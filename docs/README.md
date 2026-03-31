@@ -2,6 +2,8 @@
 
 Welcome to the **IOTA2 Circular Economy Platform** documentation. This folder contains comprehensive documentation for THREE interconnected projects built by Tabulas for the MasterZ × IOTA Hackathon.
 
+> **Hackathon focus (Textile Tracer):** for the submission and demo, the primary folders are **`DPP_core/`** (Move smart contracts) and **`DPP_UI/`** (Next.js UI). The other folders in the repo are mostly workshop exercises, prototypes, or experiments.
+
 ## 🚀 Active Projects
 
 1. **ScholarFlow** - Grant management system (✅ LIVE on testnet)
