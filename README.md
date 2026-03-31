@@ -61,9 +61,10 @@ Why IOTA: **feeless transactions** (critical at per-product scale), notarization
 
 ## Live demo & media
 
-- **Demo URL**: *(add link)*
-- **Demo video**: *(add link)*
-- **Slides**: *(add link)*
+- **Live Demo**: [https://iota2shirt.vercel.app](https://iota2shirt.vercel.app)
+- **Info Site**: [https://iota2-seven.vercel.app](https://iota2-seven.vercel.app)
+- **GitHub Repository**: [flybylow/iota2](https://github.com/flybylow/iota2/tree/main)
+- **Smart Contract Explorer**: [View on IOTA Explorer](https://explorer.iota.org/object/0x21969d6088c060068f2f54696fbfc335c42b15ea1bb645dbbe573578cdf5277d?network=testnet)
 
 ---
 
@@ -113,5 +114,5 @@ Other folders are workshop experiments / exercises and are not required to under
 ## Team / contact
 
 - **Team**: Tabulas (MasterZ × IOTA Hackathon)
-- **Contact**: *(add email or handle)*
+
 
